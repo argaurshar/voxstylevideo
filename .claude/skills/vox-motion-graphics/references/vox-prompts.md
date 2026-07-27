@@ -39,9 +39,13 @@ push-ins during "listen to this" beats, whip-pans or page-flips between
 ideas, parallax drift between collage layers. Something should always be
 moving, but only one thing should be *loud* at a time.
 
-## STYLE KEY prompt (only for 16:9 runs — default 9:16 uses the preset)
+## STYLE KEY prompt
 
-Use with `generate_image`, model `nano_banana_pro`, `aspect_ratio: "16:9"`:
+Every run generates its own key — there is no stock preset to resolve. Use
+`images_generate`, `mode: "imagen-nano-banana-2-flash"`, and set
+`aspectRatio` to the video's target ratio (`"9:16"` default, `"16:9"` for
+landscape). Keep the returned creation `identifier`; it becomes the
+`{ type: "style" }` reference on every clip.
 
 ```
 Editorial mixed-media collage style swatch, Vox-documentary motion graphics
@@ -74,13 +78,20 @@ SCENE: {the collage composition that illustrates this block's narration line:
 which cutouts, which color field, which annotations/charts/maps}.
 MOTION: {entrance choreography + camera move + what animates during the shot}.
 AUDIO: {ambient bed + one or two paper/whoosh/tick SFX — no voice, no narration}.
-NEGATIVE: readable text, letters, words, numbers, captions, subtitles,
-watermark, logo, photorealism, live-action footage, 3D render, lip-sync,
-talking characters, color drift.
+EXCLUDE: No readable text, letters, words, numbers, captions or subtitles
+anywhere. No watermark, no logo. Not photorealistic, no live-action footage,
+no 3D render, no lip-sync, no talking characters, no color drift.
 ```
 
-The NEGATIVE line is fixed — copy it verbatim into every block. The scene
-must visualize the narration's *idea*, not depict someone saying it.
+The EXCLUDE line is fixed — copy it verbatim into every block. It is written
+as a plain closing sentence **inside the prompt**, because Seedance exposes no
+`negativePrompt` field; a separate negative parameter will not be honored.
+
+Pair each block with a `cameraMotion` value that matches its MOTION line —
+`pushIn` for a "listen to this" beat, `whipPan` between ideas, `crashZoomIn`
+on an impact, `fpvDrone` for a fake-oner, `overhead` for a map or grid.
+
+The scene must visualize the narration's *idea*, not depict someone saying it.
 
 ## Worked examples
 
@@ -101,11 +112,12 @@ remaining plate.
 MOTION: Cutouts pop in with slight overshoot in quick succession; slow camera
 push-in as they begin tumbling; the marker circle draws in one confident
 stroke at the end.
+[send with cameraMotion: "pushIn"]
 AUDIO: Soft paper rustles and quick whoosh ticks as cutouts flip and fall,
 low minimal ambient pulse underneath — no voice, no narration.
-NEGATIVE: readable text, letters, words, numbers, captions, subtitles,
-watermark, logo, photorealism, live-action footage, 3D render, lip-sync,
-talking characters, color drift.
+EXCLUDE: No readable text, letters, words, numbers, captions or subtitles
+anywhere. No watermark, no logo. Not photorealistic, no live-action footage,
+no 3D render, no lip-sync, no talking characters, no color drift.
 ```
 
 Narration (mid-video evidence block): *"In nineteen seventy, shipping one
@@ -127,11 +139,12 @@ growing stack.
 MOTION: Map slides in with ease-out; route line draws left to right; camera
 drifts laterally following the ship; bars shrink with snappy steps; container
 stack builds with rhythmic pops.
+[send with cameraMotion: "truckLeft"]
 AUDIO: Low ambient hum, soft tick per bar step, gentle ocean-paper whoosh —
 no voice, no narration.
-NEGATIVE: readable text, letters, words, numbers, captions, subtitles,
-watermark, logo, photorealism, live-action footage, 3D render, lip-sync,
-talking characters, color drift.
+EXCLUDE: No readable text, letters, words, numbers, captions or subtitles
+anywhere. No watermark, no logo. Not photorealistic, no live-action footage,
+no 3D render, no lip-sync, no talking characters, no color drift.
 ```
 
 ## Script example (structure reference, 6 blocks = 1 minute)

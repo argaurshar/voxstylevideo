@@ -10,15 +10,10 @@ the topic is geopolitics, money, or power.
 
 ## Style key
 
-Reusable style key already generated — attach its job id as an image
-reference instead of regenerating:
-
-```
-STYLE KEY (diorama): 0561c26f-ad53-44da-815d-a8796d32d864
-```
-
-If a fresh key is ever needed, the prompt that produced it
-(`generate_image`, `nano_banana_pro`, 16:9):
+Generate a fresh key per run with `images_generate`
+(`mode: "imagen-nano-banana-2-flash"`, `aspectRatio` matching the video),
+then attach its creation `identifier` as the single `{ type: "style" }`
+reference on every clip:
 
 ```
 Cinematic vintage paper diorama style swatch, documentary collage
@@ -51,50 +46,93 @@ Unlike the Mixed Media style (which bans all in-clip text), this style
 CARRIES short letterpress text on props — that's its signature. One label
 per scene, 1–2 words or a number ("EXPIRED", "1,000", "AUGUST",
 "WHO BLINKS?"), always described as "distressed letterpress" on a torn
-burnt-orange paper element, and always fenced in the negative:
+burnt-orange paper element, and always fenced in the closing exclusions:
 `No text anywhere except "<LABEL>". No gibberish letters…`.
 
-## Reusable prop assets (attach to keep objects consistent)
+## Reusable prop assets
 
-Generated 1:1 on plain backgrounds with the style key referenced — pass
-alongside the style key as extra `image_references` and say "the X from
-the reference image" in the prompt so the object doesn't morph between
-clips:
-
-| Prop | Job id |
-|---|---|
-| Paper nuclear missile (orange nose) | 0cb0ada4-5376-44fe-8950-822425825336 |
-| Aged newspaper front page (censor-bar portrait) | 4cf403d1-6791-4661-af13-7d61330accdd |
-| Powder keg "WHO BLINKS?" + coiled fuse | 68d803d1-3876-4410-9be4-9d800f6913be |
-| Three leader cutouts (US red tie / RU / CN) | bd35a771-ddd9-456f-827a-18027293d1b0 |
-
-New props: `generate_image` + `nano_banana_pro`, 1:1, style key attached,
-"Single reusable prop asset, centered on a plain warm off-white paper
-background… Nothing else in frame."
-
-## Engine: seedance_2_0 (ref-grade)
+Props keep objects from morphing between clips. Generate each one 1:1 on a
+plain background with the style key referenced:
 
 ```
-generate_video
-  model: "seedance_2_0"
-  duration: 10
-  resolution: "720p"        # 45 cr; 1080p = 90 cr
-  mode: "std"
-  aspect_ratio: "16:9"
-  genre: "noir"             # consistent dark grade across clips
-  generate_audio: true      # native SFX/drone sound design — keep it
-  medias: [ { value: "<style key>", role: "image_references" }, …props ]
+images_generate
+  prompt: "Single reusable prop asset, centered on a plain warm off-white
+           paper background… Nothing else in frame. <STYLE tokens>"
+  mode: "imagen-nano-banana-2-flash"
+  aspectRatio: "1:1"
+  references: [ { type: "style", identifier: "<style key identifier>" } ]
 ```
 
-Seedance executes in-prompt cuts ("Shot 1 … Cut to shot 2 …"), reads
-"speed ramp", "FPV", "whip pan" literally, and renders real fire/embers
-beautifully. Its native audio (fuse crackle, drones, impacts) survives
-assembly under the voiceover — design it in the prompt ("Sound design: …
-No speech.").
+Then pass each prop into the clip alongside the style key as
+`{ type: "image", url: "<prop identifier>" }` (Seedance allows up to 9) and
+say "the X from the reference image" in the prompt.
 
-gemini_omni (30 cr) is the fallback — notably it renders RECOGNIZABLE
-politician likenesses from descriptions where seedance refuses (see
-moderation notes).
+Props worth building for a geopolitics piece: a paper missile with an orange
+nose, an aged newspaper front page with a censor-bar portrait, a powder keg
+with a coiled fuse carrying the question label, and a set of anonymous leader
+cutouts distinguished only by silhouette and tie color.
+
+**For props reused across multiple videos**, promote them once with
+`library_create { name, type: "product", images: [{ creationIdentifier }] }`
+and reference the returned numeric `id` thereafter — that survives past a
+single run, where a bare creation identifier is just an asset pointer.
+
+> Earlier versions of this file pinned specific job ids for a prebuilt key
+> and four props. Those were Higgsfield job ids and do not resolve on
+> Magnific — always generate or look up your own.
+
+## Engine: Seedance 2.0
+
+```
+video_generate
+  video:
+    clips:
+      - slug: "bytedance-seedance-pro-2.0"
+        prompt: <fake-oner block prompt>
+        duration: 10
+        aspectRatio: "16:9"
+        resolution: "720p"
+        withSoundEffects: true
+        cameraMotion: "fpvDrone"
+        references:
+          - { type: "style", url: "<style key identifier>" }
+          - { type: "image", url: "<prop identifier>" }
+```
+
+Seedance reads "speed ramp", "FPV" and "whip pan" literally and renders real
+fire/embers beautifully. Its native sound effects (fuse crackle, drones,
+impacts) survive assembly ducked under the voiceover — design them in the
+prompt ("Sound design: … No speech.") and keep `withSoundEffects: true`.
+
+There is no per-clip `genre` control on Magnific — the dark grade comes from
+the style key and the STYLE tokens, so keep both attached to every clip.
+
+**Multi-shot blocks:** rather than writing "Shot 1 … Cut to shot 2" into one
+prompt, use `multi_prompt` (max 6 shots, per-shot `duration` and
+`cameraMotion`, durations summing to the clip `duration`). Seedance cuts
+between them natively.
+
+Cheaper passes: `bytedance-seedance-mini-2.0` is the quality/price pick and
+`bytedance-seedance-fast-2.0` is for drafts; both take the same references,
+`cameraMotion` and `multi_prompt` controls, capped at 720p.
+
+## Moderation map (hard-won)
+
+- **Named politicians in video prompts → the job fails** (submits fine, dies
+  at render). Names are fine in the TTS narration.
+- **Close-up recognizable statesman faces** (even described, unnamed) fail.
+  Route those blocks through an image first: generate the still with
+  `images_generate`, then animate it via
+  `keyframes: { start: { type: "image", url: "<identifier>" } }`. Mind the
+  constraint — `keyframes` cannot be combined with `image` or `video`
+  references, though a `style` reference is still allowed.
+- Mid-shot / full-body "leader with red tie / compact Russian / East
+  Asian statesman" descriptions pass. Censor bars over the eyes both sell
+  the editorial look and defuse likeness issues.
+- **"mushroom cloud" → nsfw flag.** Replace with another silhouette
+  (an hourglass worked and fit the deadline theme better).
+- A failed generation still costs nothing only if it never rendered — check
+  `creations_wait` before resubmitting, since a resubmit double-charges.
 
 ## Fake-oner block prompt shape
 
@@ -134,30 +172,24 @@ rips, one massive stamp punch, rushing paper wind. No speech.
 No text except "EXPIRED". …
 ```
 
-## Moderation map (hard-won)
-
-- **Named politicians in video prompts → job FAILS** on seedance (submits
-  fine, dies at render). Names are fine in the TTS voiceover.
-- **Close-up recognizable statesman faces** (even described, unnamed) →
-  seedance fails; **gemini_omni renders them** — route face-forward
-  blocks to gemini, keep the same style key.
-- Mid-shot / full-body "leader with red tie / compact Russian / East
-  Asian statesman" descriptions pass on BOTH engines. Censor bars over
-  the eyes both sell the editorial look and defuse likeness issues.
-- **"mushroom cloud" → nsfw flag.** Replace with another silhouette
-  (hourglass worked and fit the deadline theme better).
-- The server intercepts stylized prompts with `preset_recommendation`
-  notices (3D RENDER / IN THE DARK / DROWN IN MUSIC / FREE FALL…). Never
-  accept — resubmit with `declined_preset_id` from `retry_literal_with`.
-  The id only suppresses that exact preset; a new prompt may trip a
-  different one.
+Send this one with `cameraMotion: "crashZoomIn"` or `"fpvDrone"`.
 
 ## Music
 
-No standalone music model is usable through this MCP (sonilo_music is
-game-pipeline-only — decline, don't substitute). Options: rely on
-seedance's native drone/SFX bed (usually enough), or brief an external
-generator (Suno/Udio) and mix locally. A measured brief that matched the
-reference: ~46 BPM heartbeat pulse, sub-bass drone + low cello, almost no
-highs, 8-second breathing swells, loud open, single climax at 80% of
-runtime, rapid decay to silence.
+Magnific generates the score directly — no external tool needed:
+
+```
+audio_music_generate
+  prompt: "~46 BPM heartbeat pulse, sub-bass drone and low cello, almost no
+           high frequencies, eight-second breathing swells, loud open,
+           single climax at eighty percent of runtime, rapid decay to
+           silence. Tense investigative documentary underscore."
+  model: "elevenlabs-music-generation-v2"
+  durationSeconds: <video length>
+  instrumental: true
+```
+
+Google Lyria models are fixed at 30s; only `google-lyria-3-pro` (30–180s)
+and the ElevenLabs v1/v2 models honor a longer `durationSeconds`. The bed is
+mixed under the whole piece by `scripts/assemble.py` at low gain with fades,
+so brief it to sit *below* the narration rather than compete with it.

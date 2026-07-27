@@ -2,26 +2,27 @@
 name: vox-motion-graphics
 description: >
   Produce a complete narrated motion-graphics explainer video end-to-end with
-  Higgsfield MCP: trend/topic research, fact-checked script, a locked style
-  key, animated clips, documentary voiceover, and one final assembled MP4.
-  Two house styles: Vox-style Mixed Media collage (flat editorial, burned
-  subtitles) and cinematic paper-diorama documentary (sepia newsprint worlds,
-  censor-bar cutouts, letterpress props, fake-oner FPV energy). Use this
-  skill whenever the user asks for a "Vox-style video", "motion graphics
-  explainer", "animated explainer", "data-driven video", "cinematic paper /
-  newspaper collage documentary", "make a video about X", "make a video
-  about something trending/viral", a video "like the AI bubble reference",
-  or just "run the vox pipeline" — even when no topic is given (the skill
-  finds a trending topic itself). Also use it for faceless narrated
-  shorts/YouTube videos on geopolitics, money, or power via Higgsfield.
+  Magnific MCP: trend/topic research, fact-checked script, a locked style
+  key, animated clips, documentary voiceover, optional score, and one final
+  assembled MP4. Two house styles: Vox-style Mixed Media collage (flat
+  editorial, burned subtitles) and cinematic paper-diorama documentary (sepia
+  newsprint worlds, censor-bar cutouts, letterpress props, fake-oner FPV
+  energy). Use this skill whenever the user asks for a "Vox-style video",
+  "motion graphics explainer", "animated explainer", "data-driven video",
+  "cinematic paper / newspaper collage documentary", "make a video about X",
+  "make a video about something trending/viral", a video "like the AI bubble
+  reference", or just "run the vox pipeline" — even when no topic is given
+  (the skill finds a trending topic itself). Also use it for faceless
+  narrated shorts/YouTube videos on geopolitics, money, or power via Magnific.
 ---
 
-# Vox-Style Motion Graphics Explainer (Higgsfield MCP)
+# Vox-Style Motion Graphics Explainer (Magnific MCP)
 
 Turn one request — a topic, or nothing at all — into a finished Vox-style
 explainer video: bold editorial collage visuals, a documentary narrator, tight
-fact-driven writing, one final MP4. The pipeline runs on the Higgsfield MCP
-`video-explainer` workflow with the **Mixed Media** preset as the default look.
+fact-driven writing, one final MP4. The pipeline runs on the Magnific MCP
+using **Seedance 2.0** for clips, **ElevenLabs** for narration, and a local
+ffmpeg assembly step.
 
 **The Vox look, in one line:** archival photo cutouts with paper edges drifting
 over flat color fields and textured paper, halftone accents, hand-drawn circles
@@ -36,8 +37,7 @@ motion-designed magazine spread, never a filmed scene.
 - **Paper-diorama documentary** (`references/diorama-doc.md`) — cinematic sepia
   newsprint dioramas, censor-bar cutout figures, one burnt-orange accent,
   letterpress text ON props, fake-oner FPV camera. Best for geopolitics,
-  money, power, anything the user wants "cinematic" or high-energy. Comes
-  with a ready style key and a registry of reusable prop assets.
+  money, power, anything the user wants "cinematic" or high-energy.
 
 ## Operating mode
 
@@ -47,29 +47,33 @@ topic discovery, script, voice, assets, assembly. That means:
 - If the user gave a topic, angle, duration, or voice preference — honor it.
   Everything they didn't specify, decide yourself using the defaults below.
 - Right before submitting the first **paid** generation, post one short plan
-  message (topic, angle, block count, voice, estimated credits) so the user
-  can interrupt — then **proceed immediately without waiting for approval**,
-  unless the user asked to be consulted.
+  message (topic, angle, block count, voice, estimated credits from
+  `simulate_cost`) so the user can interrupt — then **proceed immediately
+  without waiting for approval**, unless the user asked to be consulted.
 - Never stop mid-pipeline to ask a question you can answer with a default.
   Delivering loose clips instead of an assembled MP4 is a failure.
 
-Deviation note: the underlying Higgsfield `video-explainer` workflow asks the
-user to pick style and voice interactively. This skill intentionally
-pre-answers those questions (Mixed Media preset, auto-picked documentary
-voice) because the user has delegated the whole run. Only show the preset
-gallery / voice picker if the user explicitly asks to choose.
+Magnific's `video_generate` asks external clients to call `video_plan` first.
+That step exists to draft a brief you don't have — this skill authors its own
+prompts, so **skip `video_plan` for block clips** and pass an explicit `slug`.
+Calling it once on the overall concept is fine; calling it per block will
+fight the script you already wrote.
 
 ## Defaults
 
 | Setting    | Default                                | Override when… |
 |------------|----------------------------------------|----------------|
-| Style      | Mixed Media preset, id `80e4dd7b-cd65-42d4-b191-b58d62558602` | user names another preset or supplies reference images |
-| Aspect     | 9:16 vertical (shorts/TikTok/Reels) — pass `aspect_ratio: "9:16"` explicitly on every clip; the style key alone does NOT set framing (verified: `gemini_omni` defaults to 16:9 regardless of a vertical key) | user says YouTube/landscape → 16:9 |
-| Duration   | 1 minute → N = 6 blocks (N = minutes × 6, each block = one 10s clip) | user gives a length (1–10 min) |
+| Video model| `bytedance-seedance-pro-2.0` (sota). Cost-sensitive or long runs → `bytedance-seedance-mini-2.0`; drafts → `bytedance-seedance-fast-2.0` | user names a model, or `video_models_list` shows a newer sota |
+| Image model| `imagen-nano-banana-2-flash` (Nano Banana 2). **Naming trap:** `imagen-nano-banana-2` is Nano Banana *Pro* — use it only for a final hero asset | user asks for max fidelity |
+| Aspect     | 9:16 vertical (shorts/TikTok/Reels). `aspectRatio` is a **required input** on every clip — always set it | user says YouTube/landscape → 16:9 |
+| Resolution | `720p` | user asks for 1080p/4K (pro-2.0 only) |
+| Duration   | 1 minute → N = 6 blocks (N = minutes × 6, each block = one 10s clip). Seedance accepts 4–15s, so vary block length to fit the beat | user gives a length (1–10 min) |
 | Character  | Faceless (no mascot)                   | user asks for a host/mascot |
 | Language   | English narration                      | user asks otherwise (prompts stay English regardless) |
-| Voice      | Auto-pick a deep, measured documentary narrator from `list_voices` | user wants to choose → show the picker and wait |
-| Subtitles  | ON, font `anton` (bold condensed — fits the editorial look). Costs 0.05 credit per voiced block — mention it in the plan message. | user says no subtitles |
+| Voice      | `voiceId: 350` (Henry Beckett — British documentary narrator). Alternatives: `366` Ethan Parker (deep US), `519` Basil Thornecroft (dry, wry) | user wants to choose → `audio_voices_show` and wait |
+| TTS model  | `eleven_v3` | user wants another provider |
+| Subtitles  | ON, burned locally at assembly | user says no subtitles |
+| Music      | ON — one instrumental bed via `audio_music_generate`, mixed low | user says no music |
 
 ## Story engine (what separates a banger from postcards)
 
@@ -100,24 +104,26 @@ makes the reference-grade videos hit:
 |---|---|---|
 | T Topic | use the given topic, or research what's trending and pick one | WebSearch / WebFetch |
 | R Research | gather verified facts, numbers, names; keep a Sources list | WebSearch / WebFetch |
-| 1 Style key | resolve the Mixed Media preset into a style-reference media_id (free) | `resolve_explainer_preset` (or `generate_image` for 16:9) |
+| 1 Style key | generate one style swatch; its creation identifier is the key | `images_generate` |
 | 2 Script | N narration blocks, Vox formula, ~20–24 words each | reasoning (free) |
 | 3 Block prompts | N labeled video prompts in the Vox visual language | reasoning (free) — templates in `references/vox-prompts.md` |
-| 4 Clips | N × 10s clips, style key attached to every one | `generate_video` (`gemini_omni`) |
-| 5 Voice | one narrator, N takes, same voice_id on every block | `list_voices` + `generate_audio` (`seed_audio`) |
-| 6 Assemble | stitch clips + takes into one MP4, burn subtitles | `explainer_video` |
+| 4 Clips | N × 10s clips, style key referenced on every one | `video_generate` |
+| 5 Voice | one narrator, N takes, same `voiceId` on every block | `audio_voices_list` + `audio_tts` |
+| 5b Music | one instrumental bed the length of the video | `audio_music_generate` |
+| 6 Assemble | mux narration + music, burn subtitles, concat → one MP4 | `scripts/assemble.py` |
 
 Read `references/vox-prompts.md` before Phase 1 — it holds the style
 descriptor, the block-prompt template with worked examples, and the negative
-list. Phases T, R, 2, 3 are free; 1 (preset branch), 4, 5 cost credits.
+list. Phases T, R, 2, 3 are free; 1, 4, 5, 5b cost credits.
 
-**Job model:** every `generate_*` call submits an async job and returns a job
-id. Poll with `job_status { jobId, sync: true }` where the server exposes it;
-if not, check completion via the tool-result/notification stream or
-`show_generations`. A completed job id is reused directly as a
-`medias[].value` on later generations and as `video`/`audio` in Phase 6 —
-you rarely need the raw URLs. Use `get_cost: true` on one `generate_video`
-call before Phase 4 to estimate total spend for the plan message.
+**Job model:** every generation returns a creation `identifier` and queues
+async. Long-poll with `creations_wait { identifiers: [...], timeoutSeconds:
+25 }` (1–8 at a time; in-progress entries come back with
+`poll_after_seconds`). Fetch final asset URLs with `creations_get` — use
+`url` (full-res), **never `webUrl`**. An identifier can be passed directly as
+a `references[].url` on later generations, so you rarely need raw URLs until
+Phase 6. Price any step with `simulate_cost { tool, arguments }` before
+running it — it is read-only and never charges.
 
 ## Phase T — Topic
 
@@ -149,24 +155,32 @@ invented numbers — a vague true line beats a specific false one.
 
 ## Phase 1 — Style key
 
-**Default (9:16):** call `resolve_explainer_preset` with preset id
-`80e4dd7b-cd65-42d4-b191-b58d62558602` (Mixed Media). The returned
-`media_id` IS the style key — attach it as `medias: [{ value: <media_id>,
-role: "image" }]` on **every** clip in Phase 4. This branch is free. The
-preset image is 9:16, and `gemini_omni` inherits framing from the key, so
-the video comes out vertical.
+Generate one style swatch at the **same aspect ratio as the video**, using
+the STYLE KEY prompt from the chosen style's reference file:
 
-**16:9 requested:** the preset key would force vertical framing, so instead
-generate your own landscape Vox-style key with `generate_image`, model
-`nano_banana_pro`, `aspect_ratio: "16:9"`, using the STYLE KEY prompt in
-`references/vox-prompts.md`. Poll to completion; that job id becomes the
-style key. (Costs one image generation.)
+```
+images_generate
+  prompt: <STYLE KEY prompt from the reference file>
+  mode: "imagen-nano-banana-2-flash"
+  aspectRatio: "9:16"        # or "16:9" — match the target
+  count: 1
+```
+
+Wait for it, then keep its creation `identifier`. That identifier IS the
+style key: attach it to **every** clip in Phase 4 as
+
+```
+references: [ { type: "style", url: "<style key identifier>" } ]
+```
+
+Seedance allows exactly **one** `style` reference; additional prop assets go
+in as `type: "image"` (limit 9). Generate 2–3 candidates and pick the
+strongest if the first swatch is weak — it sets the look of the whole video.
 
 ## Phase 2 — Script (Vox formula)
 
-Write N blocks, labeled `Block 1 … Block N`, one per 10s clip. Each block is
-**~20–24 words** (~8–9s spoken; hard ceiling ≈9.5s — a slight overrun gets
-pitch-safe speed-up at assembly, a big one needs a shorter line). Plain
+Write N blocks, labeled `Block 1 … Block N`, one per clip. Each block is
+**~20–24 words** (~8–9s spoken; hard ceiling ≈9.5s for a 10s clip). Plain
 spoken text only: no stage directions, no parentheticals, numbers spelled
 out ("seventy percent", "twenty twenty-four").
 
@@ -189,132 +203,187 @@ narrator explains, never hypes.
 
 Write N video prompts, one per block, each visually translating its
 narration line into the Vox collage language. Use the exact labeled template
-and the scene vocabulary in `references/vox-prompts.md`. Two rules that are
+and the scene vocabulary in `references/vox-prompts.md`. Three rules that are
 easy to forget:
 
-- **No readable text anywhere in the clips.** AI-generated lettering
-  garbles; typography beats are expressed as abstract highlight bars,
-  redaction blocks, circles and underlines instead. Real captions are burned
-  server-side in Phase 6.
-- **No one speaks on screen.** The `AUDIO:` line is ambient/SFX/music only;
-  narration is added per block at assembly.
+- **Seedance has no `negativePrompt` field.** The catalog does not list it,
+  so exclusions must be written **inline in the prompt text** as a closing
+  sentence. Do not pass `negativePrompt` — it will be ignored or rejected.
+- **No readable text anywhere in the clips** (Mixed Media). AI-generated
+  lettering garbles; typography beats are expressed as abstract highlight
+  bars, redaction blocks, circles and underlines instead. Real captions are
+  burned locally in Phase 6. The diorama style is the deliberate exception —
+  see its reference file.
+- **No one speaks on screen.** The sound-design line is ambient/SFX only;
+  narration is mixed in at assembly.
 
 ## Phase 4 — Clips
 
-**Engine choice:**
-
-- `gemini_omni` — 30 cr/clip, fast, workhorse for Mixed Media collage. Also
-  the only engine that renders recognizable politician likenesses from
-  descriptions (see moderation map in `references/diorama-doc.md`).
-- `seedance_2_0` — 45 cr (720p std) / 90 cr (1080p), ref-grade cinematic:
-  executes in-prompt cuts ("Shot 1 … Cut to shot 2"), real speed ramps and
-  FPV moves, native SFX sound design (`generate_audio: true`) that survives
-  under the voiceover. Default for the diorama style and any "make it
-  impressive" brief; call template in `references/diorama-doc.md`.
-
-Submit N `generate_video` jobs — style key on every single one (plus any
-reusable prop assets as extra `image_references`):
+Submit N `video_generate` calls — style key on every single one:
 
 ```
-generate_video
-  model: "gemini_omni"
-  prompt: <Block N video prompt>
-  duration: 10
-  resolution: "720p"
-  medias: [ { value: "<style key media_id or job id>", role: "image" } ]
+video_generate
+  video:
+    clips:
+      - slug: "bytedance-seedance-pro-2.0"
+        prompt: <Block N video prompt>       # max 10000 chars
+        duration: 10                          # 4-15 allowed
+        aspectRatio: "9:16"                   # required
+        resolution: "720p"
+        withSoundEffects: true                # native SFX bed
+        cameraMotion: "fpvDrone"              # optional, see below
+        references:
+          - { type: "style", url: "<style key identifier>" }
+          - { type: "image", url: "<prop identifier>" }   # optional, max 9
 ```
 
-Pass `aspect_ratio` explicitly ("9:16" or "16:9") — despite what the base
-workflow claims, the key image does not reliably set framing; a real run with
-a 9:16 key still produced 16:9 clips. Also expect the server to intercept the
-first submission with a `preset_recommendation` notice (it pattern-matches
-collage prompts to its "3D RENDER" preset): decline it by resubmitting with
-`declined_preset_id` from the notice's `retry_literal_with` — never accept a
-photoreal/3D preset. Submit in batches, record every job id against its block
-number, re-submit only failed blocks. If a clip renders photoreal/live-action, strengthen the STYLE and
-NEGATIVE lines and re-run that block — two identical failures means the
-prompt is wrong, not the seed. If `gemini_omni` is rejected, confirm the
-current video model id with `models_explore(type: 'video')`; never silently
-switch to a photoreal model.
+**Use the `cameraMotion` enum instead of hoping the prose lands.** Seedance
+exposes 52 named moves; the ones that serve this style are `fpvDrone`,
+`whipPan`, `crashZoomIn`, `superDollyIn`, `superDollyOut`, `craneUp`,
+`craneDown`, `360Orbit`, `orbitLeft`, `dutchAngle`, `pushIn`, `pullOut`,
+`lensFlare`, `focusChange`, `handheld`, `overhead`. Set it per block to match
+the written move; keep the prose description too.
+
+**In-block cuts are native.** For a block that needs 2–3 shots, use
+`multi_prompt` (max 6 entries, each with `prompt`, `index`, per-shot
+`duration`, optional `cameraMotion`) instead of `prompt`. Shot durations must
+sum to the clip `duration`. This replaces writing "Shot 1 … Cut to shot 2"
+into a single prompt.
+
+Submit in batches, record every identifier against its block number, and
+re-submit only failed blocks. If a clip renders photoreal/live-action,
+strengthen the style sentence and the inline exclusions and re-run that block
+— two identical failures means the prompt is wrong, not the seed. If a slug
+is rejected, re-check `video_models_list`; never silently switch to a
+photoreal model.
+
+**Face-forward blocks.** Seedance refuses close-up recognizable likenesses
+(see the moderation map in `references/diorama-doc.md`). Route those through
+an image first: generate the still with `images_generate`, then pass it as
+`keyframes: { start: { type: "image", url: "<identifier>" } }`. Note the
+constraint — `keyframes` is **prohibited with** `references` of type `image`
+or `video`, though a `style` reference is still allowed alongside it.
 
 ## Phase 5 — Voiceover
 
-1. Call `list_voices`. Auto-pick a **deep, measured, documentary** narrator
-   (calm authority, not ad-read energy); note its exact `voice_id` and
-   `voice_type`. Only show the picker and wait if the user asked to choose.
-2. One `generate_audio` call per block, same voice every time:
+1. Default to `voiceId: 350` (Henry Beckett). To pick differently, call
+   `audio_voices_list { search: "documentary" }` and choose a deep, measured
+   narrator — calm authority, not ad-read energy. Only show
+   `audio_voices_show` and wait if the user asked to choose.
+2. One `audio_tts` call per block, same voice every time:
 
 ```
-generate_audio
-  model: "seed_audio"
-  voice_type: "<preset|element>"
-  voice_id: "<from list_voices>"
-  prompt: "<Block N line, plain text>"
+audio_tts
+  text: "<Block N line, plain text>"
+  model: "eleven_v3"
+  voiceId: 350
+  speed: 1.0          # 0.7-1.2
+  stability: 0.5
 ```
 
-Fitting knobs if a take runs long: `speech_rate` (-50..100) up a notch, or
-shorten the line and re-voice. Record each take's job id against its block.
+**Verify every take's real duration before assembling.** Fetch each take with
+`creations_get` and target **8.0–9.5s** for a 10s block. TTS pacing is
+unpredictable: narrator voices pause ~0.7s at every period, so choppy
+name-heavy lines read ~1.8 words/s while one flowing comma-joined sentence
+reads ~2.5 words/s — the same word count can differ by 4+ seconds. Prefer
+single flowing sentences; expect 1–2 re-voice rounds and keep the best take
+per block. The assembler compresses a slight overrun automatically and tells
+you when a take was too long to fix (see Phase 6).
 
-**Verify every take's real duration before assembling** — read `durationSec`
-from the completed job (`show_generations`) and target **9.0–10.5s** per
-take. The assembler centers short takes (a 7s take starts ~1.5s late — reads
-as desync) and speed-compresses long ones (a 13s take gets squeezed 30% —
-reads as rushed). TTS pacing is wildly unpredictable: narrator voices pause
-~0.7s at every period, so choppy name-heavy lines read ~1.8 words/s while
-one flowing comma-joined sentence reads ~2.5 words/s — the same word count
-can differ by 4+ seconds. Prefer single flowing sentences, expect 1–2
-re-voice rounds, keep the best take per block; a slight overrun beats a
-late start.
+## Phase 5b — Music
+
+Magnific can score the piece — a capability the pipeline previously lacked.
+One instrumental bed for the whole video:
+
+```
+audio_music_generate
+  prompt: <mood brief — genre, instruments, tempo, arc>
+  model: "elevenlabs-music-generation-v2"   # 10-300s, honors durationSeconds
+  durationSeconds: <video length, rounded up>
+  instrumental: true
+```
+
+A brief that matched the reference grade: *"~46 BPM heartbeat pulse,
+sub-bass drone and low cello, almost no high frequencies, eight-second
+breathing swells, loud open, single climax at eighty percent of runtime,
+rapid decay to silence."* Google Lyria models are fixed 30s — use ElevenLabs
+v2 for anything longer. Skip this phase if the user said no music.
 
 ## Phase 6 — Assemble (automatic, mandatory)
+
+**Magnific has no server-side assembler.** `video_concatenate` joins 2–10
+clips but keeps only each clip's own audio ("no external audio bed"), so it
+cannot mux narration or burn subtitles. Use it only for a silent/SFX-only
+cut. The narrated deliverable is assembled locally by `scripts/assemble.py`.
 
 The moment all clips and takes are done, assemble — in the same run, without
 being asked:
 
-Before assembling, read the finished clips' actual `width`/`height` from
-their job records and pass THOSE — if the clips rendered in a different
-aspect than planned, the assembly must match the clips, not the plan.
+1. `creations_get` every clip, take, and the music track; collect the
+   full-res `url` of each (never `webUrl`).
+2. Read the clips' real `width`/`height` — if they rendered in a different
+   aspect than planned, the assembly must match the clips, not the plan.
+3. Write a manifest and run it:
 
-```
-explainer_video
-  params:
-    width: 720            # 1280 for 16:9 — always the clips' real size
-    height: 1280          # 720 for 16:9
-    subtitles: { font: "anton" }   # omit if user said subtitles off
-    items:
-      - { video: "<clip 1 job id>", audio: "<voice 1 job id>" }
-      …
-      - { video: "<clip N job id>", audio: "<voice N job id>" }
+```bash
+pip install imageio-ffmpeg      # only if no system ffmpeg
+python3 scripts/assemble.py manifest.json
 ```
 
-Blocks are fixed 10s windows: short takes are centered, slight overruns are
-sped up pitch-safely, video is never stretched — total = N × 10s exact.
-Poll the returned job to completion, then present the final MP4 with
-`job_display`.
+```json
+{
+  "out": "topic-slug.mp4",
+  "width": 720, "height": 1280,
+  "subtitles": true, "font": "Anton",
+  "sfx_gain": 0.25,
+  "music": {"url": "<music url>", "gain": 0.10},
+  "blocks": [
+    {"clip": "<clip 1 url>", "voice": "<take 1 url>", "text": "<Block 1 line>"},
+    {"clip": "<clip N url>", "voice": "<take N url>", "text": "<Block N line>"}
+  ]
+}
+```
+
+The script downloads everything, ducks each clip's native Seedance audio
+under the narration, burns chunked captions, holds the last frame if a take
+genuinely overruns, concatenates, and lays the music bed underneath with
+fade in/out. It prints a JSON report: per-block clip/voice/block durations,
+any tempo compression applied, and a `warnings` list. **Read the warnings** —
+a block flagged "consider re-voicing shorter" should be re-voiced and
+reassembled rather than shipped.
+
+Font note: `Anton` is the intended caption face but is rarely installed. The
+script falls back through Oswald → Liberation Sans Narrow → a condensed
+Liberation/DejaVu Sans (ScaleX 88), which reads correctly. Dropping
+`Anton-Regular.ttf` into a system font dir upgrades it automatically.
+
+Finally, present the MP4 to the user. Use `creations_show` for any Magnific
+creations worth previewing inline; send the assembled local file directly.
 
 ## Delivery
 
 Final message: the video, the topic + angle in one sentence, the full script
 (so the user can reuse it), and the Sources list. Then offer — don't run
-unasked — the `youtube-seo` skill for titles/description/tags if the video
-is headed to YouTube.
+unasked — a titles/description/tags pass if the video is headed to YouTube.
 
 ## Failure handling
 
-- Clip drifts off-style → re-attach the key, tighten STYLE/NEGATIVE, rerun
-  that block only.
-- Voice take > ~9.5s → shorten the line or raise `speech_rate`, re-voice
-  that block only.
-- `voice_id`/`voice_type` errors → you skipped `list_voices`; call it and
-  reuse one exact pair everywhere.
-- Assembly rejects an id → the job isn't terminal yet; poll it, then retry
-  assembly with all N items in order. Block N's audio always lands on clip N.
-- Video job status `failed` or `nsfw` with no error text → moderation, not
-  bad luck. Check the moderation map in `references/diorama-doc.md`: named
-  politicians and close-up recognizable faces fail on seedance (route those
-  blocks to gemini_omni or drop to mid-shot descriptions); "mushroom cloud"
+- Clip drifts off-style → re-attach the style key, strengthen the style
+  sentence and inline exclusions, rerun that block only.
+- Voice take too long → shorten the line or lower `speed`, re-voice that
+  block only. The assembler's warnings tell you exactly which blocks.
+- `video_generate` rejects `negativePrompt` → Seedance doesn't support it;
+  move exclusions inline into the prompt text.
+- `references` rejected alongside `keyframes` → `image`/`video` references
+  are prohibited with keyframes; drop to a `style` reference only.
+- Creation stuck non-terminal → `creations_wait` returns `poll_after_seconds`;
+  respect it and poll again rather than resubmitting (resubmitting double-charges).
+- Video job fails with no error text → moderation, not bad luck. Check the
+  moderation map in `references/diorama-doc.md`: named politicians and
+  close-up recognizable faces fail (route those blocks through a
+  `keyframes.start` still or drop to mid-shot descriptions); "mushroom cloud"
   and similar flag nsfw — swap the image, keep the idea.
 - User wants isolated deliverables (SFX-only track, single clips, stills):
-  raw clips have no voice — narration exists only in the assembly, so
-  extracting per-clip audio/frames locally (AVFoundation/ffmpeg) yields
-  clean voiceless assets.
+  raw clips have no narration — it exists only in the local assembly — so the
+  downloaded clips are already clean voiceless assets, and
+  `video_concatenate` gives a quick SFX-only cut.
