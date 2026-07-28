@@ -411,6 +411,26 @@ any tempo compression applied, and a `warnings` list. **Read the warnings** —
 a block flagged "consider re-voicing shorter" should be re-voiced and
 reassembled rather than shipped.
 
+**Kill the dead air — set `"tighten": true`.** A fixed 10s clip against a
+~22-word line leaves 1–2s of silence at the end of most blocks, and six of
+those read as a slideshow. With `tighten`, each block ends when its narration
+ends and the video is **time-compressed to fit** (`setpts`) so the whole
+camera move still plays — trimming instead would lop the end off every move.
+Pair it with `"pace"` (1.05–1.10) to speed the narration globally. On a real
+run this took 60.3s to 51.0s with video at 1.07–1.34× and no gap over 0.6s.
+
+```json
+{ "tighten": true, "pace": 1.07, "lead_in": 0.12, "tail_pad": 0.14 }
+```
+
+Blocks whose take is much shorter than the clip get the largest speed-up
+(a 7.7s take in a 10s clip runs 1.34×), which suits a cold open but can look
+frantic on a slow reveal — check the report's `vspeed` per block and drop
+`pace` to 1.0 if any block looks rushed. Verify with ffmpeg's `silencedetect`
+rather than trusting the arithmetic. Better still, fix it upstream: pick clip
+durations that match the spoken line (Seedance takes any 4–15s) instead of
+defaulting every block to 10s.
+
 Font note: `Anton` is the intended caption face but is rarely installed. The
 script falls back through Oswald → Liberation Sans Narrow → a condensed
 Liberation/DejaVu Sans (ScaleX 88), which reads correctly. Dropping

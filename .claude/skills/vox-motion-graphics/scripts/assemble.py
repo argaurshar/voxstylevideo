@@ -241,6 +241,17 @@ def main():
     sfx_gain = float(man.get("sfx_gain", 0.25))
     music = man.get("music") or {}
 
+    # Pacing controls.
+    #   pace    — narration speed multiplier applied to every block (1.0 = as
+    #             recorded). 1.05-1.10 tightens delivery without pitch damage.
+    #   tighten — cut each block to its narration instead of running the full
+    #             clip, then time-compress the video to match so the whole
+    #             move still plays. This is what removes inter-block dead air.
+    pace = float(man.get("pace", 1.0))
+    tighten = bool(man.get("tighten", False))
+    lead_in = float(man.get("lead_in", LEAD_IN))
+    tail_pad = float(man.get("tail_pad", TAIL_PAD))
+
     work = os.path.abspath(man.get("workdir", "vox_build"))
     os.makedirs(work, exist_ok=True)
 
@@ -259,28 +270,38 @@ def main():
         vo_d = duration_of(voice) if voice else 0.0
         clip_has_audio = has_audio(clip)
 
-        # Fit narration inside the clip window where possible; only stretch
-        # the block if the take genuinely cannot be compressed enough.
-        tempo = 1.0
-        block_d = clip_d
+        tempo = pace
         note = None
-        if vo_d:
-            budget = clip_d - LEAD_IN - TAIL_PAD
-            if vo_d > budget:
-                needed = vo_d / max(0.1, budget)
-                if needed <= MAX_ATEMPO:
-                    tempo = needed
-                    note = f"narration sped {needed:.3f}x to fit"
-                else:
-                    tempo = MAX_ATEMPO
-                    block_d = LEAD_IN + (vo_d / MAX_ATEMPO) + TAIL_PAD
-                    note = (f"take {vo_d:.1f}s exceeds clip {clip_d:.1f}s; "
-                            f"capped at {MAX_ATEMPO}x and block extended to "
-                            f"{block_d:.1f}s — consider re-voicing shorter")
-                    report["warnings"].append(f"block {i}: {note}")
+        if tighten and vo_d:
+            # Block length follows the narration, not the clip. Nothing is
+            # padded, so no block can end in silence.
+            block_d = lead_in + (vo_d / tempo) + tail_pad
+        else:
+            # Fit narration inside the clip window where possible; only
+            # stretch the block if the take cannot be compressed enough.
+            block_d = clip_d
+            if vo_d:
+                budget = clip_d - lead_in - tail_pad
+                if (vo_d / tempo) > budget:
+                    needed = vo_d / max(0.1, budget)
+                    if needed <= MAX_ATEMPO:
+                        tempo = needed
+                        note = f"narration sped {needed:.3f}x to fit"
+                    else:
+                        tempo = MAX_ATEMPO
+                        block_d = lead_in + (vo_d / MAX_ATEMPO) + tail_pad
+                        note = (f"take {vo_d:.1f}s exceeds clip {clip_d:.1f}s; "
+                                f"capped at {MAX_ATEMPO}x and block extended to "
+                                f"{block_d:.1f}s — consider re-voicing shorter")
+                        report["warnings"].append(f"block {i}: {note}")
         eff_vo = (vo_d / tempo) if vo_d else 0.0
-        vo_start = LEAD_IN
+        vo_start = lead_in
         vo_end = vo_start + eff_vo
+
+        # How much the video must be sped up (>1) to fill exactly block_d.
+        vspeed = clip_d / block_d if block_d > 0.05 else 1.0
+        if vspeed > 1.005 and note is None:
+            note = f"video {vspeed:.2f}x to close the gap"
 
         # ---- filtergraph
         inputs = ["-i", clip]
@@ -291,7 +312,12 @@ def main():
         # mapped uniformly as [label] regardless of which chains ran.
         chains = ["[0:v]null[v0]"]
         vlabel = "v0"
-        if block_d > clip_d + 0.05:
+        if vspeed > 1.005:
+            # Compress the clip into the shorter block so the whole camera
+            # move still plays — trimming would lop off the end of the motion.
+            chains.append(f"[{vlabel}]setpts=PTS/{vspeed:.6f}[vsp]")
+            vlabel = "vsp"
+        elif block_d > clip_d + 0.05:
             # Hold the last frame rather than stretching motion.
             chains.append(f"[{vlabel}]tpad=stop_mode=clone:stop_duration="
                           f"{block_d - clip_d:.3f}[vp]")
@@ -308,7 +334,9 @@ def main():
         # audio: ducked clip SFX + narration
         alabel = None
         if clip_has_audio and sfx_gain > 0:
-            chains.append(f"[0:a]volume={sfx_gain},"
+            # Keep the clip's own SFX in sync when the video is time-compressed.
+            bed_tempo = f"{atempo_chain(vspeed)}," if vspeed > 1.005 else ""
+            chains.append(f"[0:a]volume={sfx_gain},{bed_tempo}"
                           f"apad,atrim=0:{block_d:.3f},asetpts=N/SR/TB[bed]")
             alabel = "bed"
         if voice:
@@ -344,7 +372,7 @@ def main():
         report["blocks"].append({
             "block": i, "clip_s": round(clip_d, 2), "voice_s": round(vo_d, 2),
             "block_s": round(block_d, 2), "tempo": round(tempo, 3),
-            "note": note,
+            "vspeed": round(vspeed, 3), "note": note,
         })
 
     # ---- concat
