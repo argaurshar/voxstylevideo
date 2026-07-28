@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>15 Free Claude Skills — 9:16 animated sheet</title>
+<style>
+  @font-face{font-family:'Inter';src:url('fonts/Inter-300.ttf') format('truetype');font-weight:300;font-style:normal;font-display:block}
+  @font-face{font-family:'Inter';src:url('fonts/Inter-400.ttf') format('truetype');font-weight:400;font-style:normal;font-display:block}
+  @font-face{font-family:'Inter';src:url('fonts/Inter-600.ttf') format('truetype');font-weight:600;font-style:normal;font-display:block}
+  @font-face{font-family:'Inter';src:url('fonts/Inter-800.ttf') format('truetype');font-weight:800;font-style:normal;font-display:block}
+  @font-face{font-family:'JBMono';src:url('fonts/JBMono-400.ttf') format('truetype');font-weight:400;font-style:normal;font-display:block}
+  @font-face{font-family:'JBMono';src:url('fonts/JBMono-500.ttf') format('truetype');font-weight:500;font-style:normal;font-display:block}
+  @font-face{font-family:'JBMono';src:url('fonts/JBMono-700.ttf') format('truetype');font-weight:700;font-style:normal;font-display:block}
+  @font-face{font-family:'Playfair';src:url('fonts/Playfair-900.ttf') format('truetype');font-weight:900;font-style:normal;font-display:block}
+
+  :root{
+    --bg:#171613;
+    --cream:#F2ECDD;
+    --cream-soft:#E3DDCE;
+    --accent:#E8845C;
+    --line:#3A3832;
+    --line-soft:#2A2823;
+    --muted:#8C857A;
+    --dim:#6A645B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000}
+  body{width:1080px;height:1920px;overflow:hidden}
+
+  #stage{
+    position:relative;width:1080px;height:1920px;background:var(--bg);
+    overflow:hidden;transform-origin:50% 50%;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- ambient layers ---------- */
+  #grid{
+    position:absolute;inset:0;opacity:0;
+    background-image:
+      repeating-linear-gradient(0deg,rgba(242,236,221,.5) 0 1px,transparent 1px 60px),
+      repeating-linear-gradient(90deg,rgba(242,236,221,.5) 0 1px,transparent 1px 60px);
+    -webkit-mask-image:radial-gradient(120% 80% at 50% 42%,#000 20%,transparent 78%);
+            mask-image:radial-gradient(120% 80% at 50% 42%,#000 20%,transparent 78%);
+  }
+  #vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 90% at 50% 38%,transparent 45%,rgba(0,0,0,.55) 100%);
+  }
+  #grain{position:absolute;inset:0;opacity:.05;pointer-events:none;mix-blend-mode:overlay}
+  #sweep{
+    position:absolute;top:-30%;left:0;width:44%;height:160%;pointer-events:none;opacity:0;
+    background:linear-gradient(90deg,transparent,rgba(232,132,92,.10) 42%,rgba(242,236,221,.13) 52%,transparent);
+    transform:translateX(-60%) rotate(8deg);filter:blur(2px);
+  }
+
+  /* ---------- panel border ---------- */
+  .brd{position:absolute;background:var(--line)}
+  #brdT{left:40px;top:40px;width:1000px;height:1px;transform:scaleX(0);transform-origin:50% 50%}
+  #brdB{left:40px;top:1879px;width:1000px;height:1px;transform:scaleX(0);transform-origin:50% 50%}
+  #brdL{left:40px;top:40px;width:1px;height:1840px;transform:scaleY(0);transform-origin:50% 50%}
+  #brdR{left:1039px;top:40px;width:1px;height:1840px;transform:scaleY(0);transform-origin:50% 50%}
+
+  .reg{position:absolute;width:26px;height:26px;opacity:0}
+  .reg i{position:absolute;background:var(--accent);opacity:.75}
+  .reg i:first-child{left:0;top:12px;width:26px;height:1px}
+  .reg i:last-child{left:12px;top:0;width:1px;height:26px}
+
+  /* ---------- content ---------- */
+  .abs{position:absolute}
+  .mono{font-family:'JBMono',monospace}
+  .sans{font-family:'Inter',sans-serif}
+
+  #eyebrow{left:78px;top:100px;font-size:23px;font-weight:500;letter-spacing:.26em;color:var(--accent);white-space:pre}
+  #cursor{display:inline-block;width:14px;height:23px;background:var(--accent);vertical-align:-3px;margin-left:4px}
+
+  #hero{left:0;top:158px;width:1080px;height:290px}
+  #big{position:absolute;left:74px;top:-38px;font-family:'Playfair',serif;font-weight:900;font-size:292px;
+       line-height:1;color:var(--cream);letter-spacing:-.01em;transform-origin:0% 62%}
+  #big span{display:inline-block}
+  #words{position:absolute;left:470px;top:8px;font-family:'Inter',sans-serif;font-weight:800;font-size:74px;
+         line-height:.98;letter-spacing:-.018em}
+  #words div{color:var(--cream);transform-origin:0% 70%}
+  #w0{color:var(--accent)!important}
+
+  .rule{position:absolute;left:78px;width:924px;height:1px;background:var(--line);transform:scaleX(0);transform-origin:0% 50%}
+  #rule1{top:474px}
+  #rule2{top:790px}
+  #rule3{top:1570px}
+
+  #head{left:78px;top:518px;width:940px;font-family:'Inter',sans-serif;font-weight:300;font-size:58px;
+        line-height:74px;color:var(--cream);letter-spacing:-.012em}
+  #head div{overflow:hidden}
+  #head div span{display:block}
+
+  #sub{left:78px;top:700px;font-family:'Inter',sans-serif;font-weight:400;font-size:32px;color:var(--muted);letter-spacing:-.005em}
+
+  #ch1{left:78px;top:818px;font-size:19px;font-weight:500;letter-spacing:.18em;color:var(--accent)}
+  #ch2{left:622px;top:819px;font-size:17px;font-weight:500;letter-spacing:.12em;color:var(--accent);white-space:nowrap}
+  #swatch{left:585px;top:815px;width:23px;height:23px;background:var(--accent);transform:scale(0);transform-origin:50% 50%}
+
+  .row{position:absolute;width:432px;height:78px}
+  .rowflash{position:absolute;left:-14px;top:1px;width:460px;height:62px;opacity:0;
+            background:linear-gradient(90deg,rgba(232,132,92,.20),rgba(232,132,92,.03) 62%,transparent)}
+  .rowline{position:absolute;left:0;bottom:0;width:432px;height:1px;background:var(--line-soft);
+           transform:scaleX(0);transform-origin:0% 50%}
+  .rownum{position:absolute;left:0;top:16px;font-family:'JBMono',monospace;font-size:22px;font-weight:400;color:var(--dim);opacity:0}
+  .rowname{position:absolute;left:58px;top:8px;font-family:'JBMono',monospace;font-size:28px;font-weight:400;
+           color:var(--cream-soft);white-space:nowrap;clip-path:inset(0 100% 0 0)}
+  .rowname.hot{color:var(--accent)}
+  .rowcaret{position:absolute;top:10px;width:3px;height:32px;background:var(--accent);opacity:0}
+
+  #marker{position:absolute;left:44px;top:890px;width:0;height:0;opacity:0;
+          border-left:11px solid var(--accent);border-top:8px solid transparent;border-bottom:8px solid transparent;
+          transform-origin:0% 50%}
+
+  #bracket{position:absolute;left:1006px;top:1102px;width:16px;height:312px;opacity:0}
+  #bracket .bv{position:absolute;left:15px;top:0;width:1px;height:100%;background:var(--accent);opacity:.55}
+  #bracket .bh{position:absolute;left:0;width:16px;height:1px;background:var(--accent);opacity:.55}
+  #blabel{position:absolute;left:585px;top:1416px;font-family:'JBMono',monospace;font-size:19px;font-weight:500;
+          letter-spacing:.14em;color:var(--accent);opacity:0}
+
+  #prog{position:absolute;left:78px;top:1622px;width:924px;height:34px;opacity:0}
+  #ptrack{position:absolute;left:0;top:14px;width:924px;height:3px;background:#26241F}
+  #pfill{position:absolute;left:0;top:14px;width:0;height:3px;background:var(--accent)}
+  #pknob{position:absolute;left:0;top:9px;width:3px;height:13px;background:var(--cream)}
+  #pread{position:absolute;left:0;top:-30px;font-family:'JBMono',monospace;font-size:20px;font-weight:500;
+         letter-spacing:.14em;color:var(--muted)}
+
+  .foot{position:absolute;font-family:'JBMono',monospace;opacity:0}
+  .foot .fl{font-size:19px;font-weight:400;letter-spacing:.20em;color:var(--dim)}
+  .foot .fv{margin-top:13px;font-size:24px;font-weight:400;letter-spacing:.04em;color:var(--cream-soft)}
+  #f1{left:78px;top:1712px}
+  #f2{left:420px;top:1712px}
+  #f3{left:760px;top:1712px}
+
+  #stamp{position:absolute;left:585px;top:1462px;padding:13px 24px 15px;border:1px solid var(--accent);
+         font-family:'JBMono',monospace;font-size:24px;font-weight:700;letter-spacing:.12em;color:var(--accent);
+         opacity:0;transform-origin:50% 50%;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="grid"></div>
+
+  <div class="brd" id="brdT"></div>
+  <div class="brd" id="brdB"></div>
+  <div class="brd" id="brdL"></div>
+  <div class="brd" id="brdR"></div>
+
+  <div class="reg" id="rg0" style="left:54px;top:54px"><i></i><i></i></div>
+  <div class="reg" id="rg1" style="left:1000px;top:54px"><i></i><i></i></div>
+  <div class="reg" id="rg2" style="left:54px;top:1840px"><i></i><i></i></div>
+  <div class="reg" id="rg3" style="left:1000px;top:1840px"><i></i><i></i></div>
+
+  <div class="abs mono" id="eyebrow"><span id="eyetext"></span><i id="cursor"></i></div>
+
+  <div class="abs" id="hero">
+    <div id="big"><span id="d0">1</span><span id="d1">5</span></div>
+    <div id="words">
+      <div id="w0">FREE</div>
+      <div id="w1">CLAUDE</div>
+      <div id="w2">SKILLS</div>
+    </div>
+  </div>
+
+  <div class="rule" id="rule1"></div>
+
+  <div class="abs" id="head">
+    <div><span id="h0">Still typing your door schedule</span></div>
+    <div><span id="h1">into Excel by hand?</span></div>
+  </div>
+  <div class="abs" id="sub">These 15 do it for you. Every one is free.</div>
+
+  <div class="rule" id="rule2"></div>
+
+  <div class="abs mono" id="ch1">THE SCHEDULE</div>
+  <div class="abs" id="swatch"></div>
+  <div class="abs mono" id="ch2">ALREADY IN YOUR CLAUDE ACCOUNT</div>
+
+  <div id="rows"></div>
+  <div id="marker"></div>
+
+  <div id="bracket">
+    <div class="bv"></div><div class="bh" style="top:0"></div><div class="bh" style="bottom:0"></div>
+  </div>
+  <div id="blabel">NO INSTALL NEEDED</div>
+
+  <div class="rule" id="rule3"></div>
+
+  <div id="prog">
+    <div id="pread">00 / 15 REVEALED</div>
+    <div id="ptrack"></div>
+    <div id="pfill"></div>
+    <div id="pknob"></div>
+  </div>
+
+  <div id="stamp">ALL FREE &middot; MIT</div>
+
+  <div class="foot" id="f1"><div class="fl">CURATED BY</div><div class="fv">NITISH JAIN</div></div>
+  <div class="foot" id="f2"><div class="fl">LICENCE</div><div class="fv">MIT / open source</div></div>
+  <div class="foot" id="f3"><div class="fl">SHEET</div><div class="fv">01 of 01</div></div>
+
+  <div id="sweep"></div>
+  <div id="grain"></div>
+  <div id="vignette"></div>
+</div>
+
+<script>
+/* ============================================================
+   Deterministic timeline. Nothing animates on its own:
+   the renderer calls window.renderFrame(t) for every frame.
+   ============================================================ */
+const DURATION = 30.0;
+
+const SKILLS = [
+  ['01','schedule-extractor',0],  ['02','zoning-analyser',0],
+  ['03','code-checker',0],        ['04','environmental-analysis',0],
+  ['05','mcp-image',0],           ['06','gpt-image-mcp',0],
+  ['07','revit-mcp',0],           ['08','qs-estimator',0],
+  ['09','bid-tabulator',1],       ['10','spec-writer',1],
+  ['11','timeline-creator',1],    ['12','pptx',1,true],
+  ['13','xlsx',1,true],           ['14','docx',1,true],
+  ['15','pdf',1,true]
+];
+
+const LIST_TOP = 868, ROW_H = 78, COL_X = [78, 585];
+
+/* ---- build rows ---- */
+const rowsEl = document.getElementById('rows');
+const R = SKILLS.map((s, i) => {
+  const col = s[2], idxInCol = col === 0 ? i : i - 8;
+  const el = document.createElement('div');
+  el.className = 'row';
+  el.style.left = COL_X[col] + 'px';
+  el.style.top  = (LIST_TOP + idxInCol * ROW_H) + 'px';
+  el.innerHTML =
+    '<div class="rowflash"></div>' +
+    '<div class="rownum">' + s[0] + '</div>' +
+    '<div class="rowname' + (s[3] ? ' hot' : '') + '">' + s[1] + '</div>' +
+    '<div class="rowcaret"></div>' +
+    '<div class="rowline"></div>';
+  rowsEl.appendChild(el);
+  return {
+    flash: el.children[0], num: el.children[1], name: el.children[2],
+    caret: el.children[3], line: el.children[4],
+    col, y: LIST_TOP + idxInCol * ROW_H, w: 0
+  };
+});
+
+/* ---- static grain (rendered once, cached by the compositor) ---- */
+document.getElementById('grain').style.backgroundImage =
+  "url(\"data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300">' +
+    '<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/></filter>' +
+    '<rect width="300" height="300" filter="url(#n)"/></svg>') + "\")";
+
+/* ---- easing helpers ---- */
+const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
+const P  = (t, s, d) => clamp((t - s) / d, 0, 1);          // 0..1 progress
+const eo = x => 1 - Math.pow(1 - x, 3);                     // easeOutCubic
+const eo5 = x => 1 - Math.pow(1 - x, 5);                    // easeOutQuint
+const eio = x => x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2;
+const back = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const pad2 = n => String(n).padStart(2, '0');
+
+/* ---- timeline ---- */
+const T = {
+  grid: 0.05, border: 0.15, reg: 0.62,
+  eyebrow: 0.72, eyebrowDur: 0.95,
+  num: 1.28, numDur: 1.05,
+  hero: 1.98, heroStag: 0.22,
+  rule1: 2.95,
+  head: 3.25, headStag: 0.38,
+  sub: 4.55,
+  rule2: 5.20,
+  colhead: 5.55,
+  skeleton: 5.85,
+  rowStart: 6.30, rowStag: 1.15, rowDur: 0.80,
+  bracket: 23.30,
+  rule3: 24.00,
+  prog: 6.10,
+  footer: 24.25, footStag: 0.24,
+  stamp: 25.45,
+  sweep: 26.90
+};
+const rowT = i => T.rowStart + i * T.rowStag;
+const EYE = 'AI + INTERIORS + ARCHITECTURE';
+
+/* ---- element cache ---- */
+const $ = id => document.getElementById(id);
+const stage = $('stage'), grid = $('grid'), sweep = $('sweep');
+const brd = [$('brdT'), $('brdB'), $('brdL'), $('brdR')];
+const regs = [$('rg0'), $('rg1'), $('rg2'), $('rg3')];
+const eyetext = $('eyetext'), cursor = $('cursor');
+const big = $('big'), d0 = $('d0'), d1 = $('d1');
+const words = [$('w0'), $('w1'), $('w2')];
+const rules = [$('rule1'), $('rule2'), $('rule3')];
+const heads = [$('h0'), $('h1')];
+const sub = $('sub'), ch1 = $('ch1'), ch2 = $('ch2'), swatch = $('swatch');
+const marker = $('marker'), bracket = $('bracket'), blabel = $('blabel');
+const prog = $('prog'), pfill = $('pfill'), pknob = $('pknob'), pread = $('pread');
+const foots = [$('f1'), $('f2'), $('f3')];
+const stamp = $('stamp');
+
+function measure() {
+  R.forEach(r => { r.w = r.name.getBoundingClientRect().width; });
+}
+
+/* ============================================================ */
+function renderFrame(t) {
+  /* ambient ------------------------------------------------- */
+  grid.style.opacity = (0.055 * eo(P(t, T.grid, 1.1))).toFixed(4);
+
+  const bp = eo5(P(t, T.border, 0.72));
+  brd[0].style.transform = brd[1].style.transform = 'scaleX(' + bp.toFixed(4) + ')';
+  const bp2 = eo5(P(t, T.border + 0.12, 0.72));
+  brd[2].style.transform = brd[3].style.transform = 'scaleY(' + bp2.toFixed(4) + ')';
+
+  regs.forEach((el, i) => {
+    const p = P(t, T.reg + i * 0.07, 0.45);
+    el.style.opacity = (p * 0.9).toFixed(3);
+    el.style.transform = 'rotate(' + (45 * (1 - eo(p))).toFixed(2) + 'deg) scale(' + (0.4 + 0.6 * eo(p)).toFixed(3) + ')';
+  });
+
+  /* eyebrow — typewriter with blinking caret ---------------- */
+  const ep = P(t, T.eyebrow, T.eyebrowDur);
+  const nch = Math.round(ep * EYE.length);
+  eyetext.textContent = EYE.slice(0, nch);
+  const typing = t > T.eyebrow && ep < 1;
+  cursor.style.opacity = (t < T.eyebrow) ? 0
+      : typing ? 1
+      : (Math.floor((t - T.eyebrow - T.eyebrowDur) * 1.9) % 2 ? 0 : 0.85);
+
+  /* the "15" — odometer count-up then a pop ----------------- */
+  const np = P(t, T.num, T.numDur);
+  if (t < T.num) {
+    big.style.opacity = 0;
+  } else {
+    big.style.opacity = 1;
+    const counting = clamp(np / 0.62, 0, 1);
+    const v = Math.max(1, Math.round(eo(counting) * 15));
+    const s = pad2(v);
+    d0.textContent = s[0]; d1.textContent = s[1];
+    // per-digit micro-jitter while the counter is still spinning
+    const spin = 1 - counting;
+    d0.style.transform = 'translateY(' + (-6 * spin * Math.sin(t * 47)).toFixed(2) + 'px)';
+    d1.style.transform = 'translateY(' + (-6 * spin * Math.sin(t * 61 + 1.7)).toFixed(2) + 'px)';
+    const popIn = clamp((np - 0.55) / 0.45, 0, 1);
+    const sc = np < 0.55 ? 0.86 + 0.06 * eo(counting) : 0.92 + 0.08 * back(popIn);
+    big.style.transform = 'scale(' + sc.toFixed(4) + ')';
+    big.style.filter = 'blur(' + (10 * (1 - eo(clamp(np / 0.3, 0, 1)))).toFixed(2) + 'px)';
+  }
+
+  /* FREE / CLAUDE / SKILLS — pop-up, one at a time ---------- */
+  words.forEach((el, i) => {
+    const p = P(t, T.hero + i * T.heroStag, 0.62);
+    el.style.opacity = eo(clamp(p * 1.6, 0, 1)).toFixed(3);
+    const sc = 0.62 + 0.38 * back(p);
+    const rot = -5 * (1 - eo(p));
+    el.style.transform = 'translateY(' + (26 * (1 - eo(p))).toFixed(2) + 'px) scale(' + sc.toFixed(4) + ') rotate(' + rot.toFixed(2) + 'deg)';
+    el.style.filter = 'blur(' + (9 * (1 - eo(clamp(p * 1.8, 0, 1)))).toFixed(2) + 'px)';
+  });
+
+  /* rules --------------------------------------------------- */
+  [T.rule1, T.rule2, T.rule3].forEach((s, i) => {
+    rules[i].style.transform = 'scaleX(' + eo5(P(t, s, 0.55)).toFixed(4) + ')';
+  });
+
+  /* headline — masked line reveal --------------------------- */
+  heads.forEach((el, i) => {
+    const p = eo5(P(t, T.head + i * T.headStag, 0.85));
+    el.style.transform = 'translateY(' + (78 * (1 - p)).toFixed(2) + 'px)';
+    el.style.opacity = clamp(p * 2.2, 0, 1).toFixed(3);
+  });
+
+  const sp = eo(P(t, T.sub, 0.7));
+  sub.style.opacity = sp.toFixed(3);
+  sub.style.transform = 'translateY(' + (16 * (1 - sp)).toFixed(2) + 'px)';
+
+  /* column headers + swatch --------------------------------- */
+  const cp = eo(P(t, T.colhead, 0.55));
+  ch1.style.opacity = cp.toFixed(3);
+  ch1.style.transform = 'translateX(' + (-14 * (1 - cp)).toFixed(2) + 'px)';
+  const cp2 = eo(P(t, T.colhead + 0.18, 0.55));
+  ch2.style.opacity = cp2.toFixed(3);
+  ch2.style.transform = 'translateX(' + (-14 * (1 - cp2)).toFixed(2) + 'px)';
+
+  const swp = P(t, T.colhead + 0.1, 0.5);
+  // the swatch keeps a slow heartbeat, and thumps when a built-in skill lands
+  let thump = 0;
+  for (let i = 11; i < 15; i++) {
+    const d = t - rowT(i);
+    if (d >= 0 && d < 0.5) thump = Math.max(thump, (1 - d / 0.5) * Math.sin(d * 22));
+  }
+  const beat = t > T.colhead + 0.6 ? 0.045 * Math.sin((t - T.colhead) * 2.4) : 0;
+  swatch.style.transform = 'scale(' + (back(swp) * (1 + beat + 0.22 * thump)).toFixed(4) +
+                           ') rotate(' + (45 * (1 - eo(swp))).toFixed(2) + 'deg)';
+
+  /* the 15 skill rows --------------------------------------- */
+  let revealed = 0, activeIdx = -1;
+  R.forEach((r, i) => {
+    const s = rowT(i), p = P(t, s, T.rowDur);
+    if (t >= s + T.rowDur) revealed++;
+    if (t >= s && t < s + T.rowStag) activeIdx = i;
+
+    // the whole sheet's skeleton (hairlines + dim index numbers) draws in up
+    // front, so the reader sees a 15-slot schedule that then fills with names
+    const sk = T.skeleton + i * 0.045;
+    r.line.style.transform = 'scaleX(' + eo5(P(t, sk, 0.45)).toFixed(4) + ')';
+
+    const skp = eo(P(t, sk + 0.05, 0.35));
+    const npv = eo(P(t, s + 0.06, 0.38));
+    r.num.style.opacity = (skp * (0.34 + 0.61 * npv)).toFixed(3);
+    r.num.style.color = npv > 0.5 ? '#8C857A' : '#4A453E';
+    r.num.style.transform = 'translateY(' + (8 * (1 - skp)).toFixed(2) + 'px)';
+
+    // name wipes open left→right behind a travelling caret
+    const rp = eo5(P(t, s + 0.14, 0.52));
+    r.name.style.clipPath = 'inset(0 ' + (100 - 100 * rp).toFixed(2) + '% 0 0)';
+    r.name.style.transform = 'translateX(' + (-10 * (1 - rp)).toFixed(2) + 'px)';
+    r.name.style.opacity = rp > 0 ? 1 : 0;
+
+    const showCaret = t >= s + 0.10 && t <= s + 0.80;
+    r.caret.style.opacity = showCaret ? (rp < 1 ? 1 : (1 - P(t, s + 0.66, 0.14))).toFixed(3) : 0;
+    r.caret.style.left = (58 + r.w * rp).toFixed(1) + 'px';
+
+    // orange wash sweeps through as the row lands
+    const fp = P(t, s, 0.72);
+    r.flash.style.opacity = (fp === 0 || fp === 1 ? 0 : Math.sin(fp * Math.PI) * 0.9).toFixed(3);
+    r.flash.style.transform = 'translateX(' + (-30 + 30 * eo(fp)).toFixed(1) + 'px)';
+  });
+
+  /* active-row marker --------------------------------------- */
+  if (activeIdx >= 0) {
+    const r = R[activeIdx], d = t - rowT(activeIdx);
+    marker.style.left = (COL_X[r.col] - 34) + 'px';
+    marker.style.top = (r.y + 18) + 'px';
+    marker.style.opacity = clamp(d / 0.16, 0, 1) * clamp((T.rowStag - d) / 0.3, 0, 1);
+    marker.style.transform = 'scale(' + (1 + 0.7 * Math.max(0, 1 - d / 0.28)).toFixed(3) + ')';
+  } else {
+    marker.style.opacity = 0;
+  }
+
+  /* progress readout ---------------------------------------- */
+  const pgp = eo(P(t, T.prog, 0.6));
+  prog.style.opacity = pgp.toFixed(3);
+  // smooth fill that tracks the row currently landing
+  const fr = clamp((t - T.rowStart + 0.35) / (SKILLS.length * T.rowStag), 0, 1);
+  const fw = 924 * clamp(fr, 0, 1);
+  pfill.style.width = fw.toFixed(1) + 'px';
+  pknob.style.left = fw.toFixed(1) + 'px';
+  pknob.style.opacity = fr > 0 && fr < 1 ? 1 : (fr >= 1 ? 0.5 : 0);
+  const shown = clamp(revealed + (activeIdx >= 0 ? 1 : 0), 0, 15);
+  pread.textContent = pad2(shown) + ' / 15 REVEALED';
+  pread.style.color = shown === 15 ? '#E8845C' : '#8C857A';
+
+  /* bracket + "no install needed" on items 12–15 ------------ */
+  const bkp = eo5(P(t, T.bracket, 0.6));
+  bracket.style.opacity = bkp.toFixed(3);
+  bracket.style.transform = 'scaleY(' + bkp.toFixed(4) + ')';
+  bracket.style.transformOrigin = '50% 0%';
+  const blp = eo(P(t, T.bracket + 0.28, 0.5));
+  blabel.style.opacity = blp.toFixed(3);
+  blabel.style.transform = 'translateX(' + (-16 * (1 - blp)).toFixed(2) + 'px)';
+
+  /* footer -------------------------------------------------- */
+  foots.forEach((el, i) => {
+    const p = eo(P(t, T.footer + i * T.footStag, 0.6));
+    el.style.opacity = p.toFixed(3);
+    el.style.transform = 'translateY(' + (18 * (1 - p)).toFixed(2) + 'px)';
+  });
+
+  /* stamp --------------------------------------------------- */
+  const stp = P(t, T.stamp, 0.7);
+  if (stp > 0) {
+    stamp.style.opacity = clamp(stp * 3, 0, 1).toFixed(3);
+    const pulse = t > T.stamp + 0.7 ? 0.02 * Math.sin((t - T.stamp) * 3.1) : 0;
+    stamp.style.transform = 'rotate(' + (-4.5 + 14 * (1 - eo(stp))).toFixed(2) + 'deg) scale(' +
+                            (0.5 + 0.5 * back(stp) + pulse).toFixed(4) + ')';
+  } else {
+    stamp.style.opacity = 0;
+  }
+
+  /* closing light sweep + settle ---------------------------- */
+  const swp2 = P(t, T.sweep, 1.9);
+  sweep.style.opacity = (swp2 > 0 && swp2 < 1 ? Math.sin(swp2 * Math.PI) : 0).toFixed(3);
+  sweep.style.transform = 'translateX(' + (-500 + 1750 * eio(swp2)).toFixed(1) + 'px) rotate(8deg)';
+
+  // very slow push-in over the whole sheet, then a tiny settle at the end
+  const drift = 1 + 0.012 * (t / DURATION);
+  const settle = 1 - 0.006 * eo(P(t, T.sweep + 0.4, 1.2));
+  stage.style.transform = 'scale(' + (drift * settle).toFixed(5) + ')';
+}
+
+window.renderFrame = renderFrame;
+window.VIDEO_DURATION = DURATION;
+window.prepare = async () => { await document.fonts.ready; measure(); renderFrame(0); };
+</script>
+</body>
+</html>
