@@ -403,6 +403,31 @@ python3 scripts/assemble.py manifest.json
 }
 ```
 
+**Tighten the cut — usually worth doing.** A 10s clip against a ~22-word line
+leaves 1–2s of dead air at the end of every block, and six of those read as a
+slideshow. Add to the manifest:
+
+```json
+{ "tighten": true, "pace": 1.07, "lead_in": 0.12, "tail_pad": 0.14 }
+```
+
+`tighten` ends each block when its narration ends and time-compresses the
+video to fit, so the whole camera move still plays — trimming instead would
+lop off the end of every move. `pace` speeds the narration globally; 1.05–1.10
+adds energy without pitch damage. On a real 6-block run this took 60.3s down
+to 51.0s with video speeds of 1.07–1.35× and no gap over 0.6s. Verify with
+`silencedetect` rather than trusting the arithmetic. The better long-term fix
+is upstream: write shorter clips (Seedance goes down to 4s) so there is less
+runway to reclaim.
+
+**Force an exact aspect ratio.** Models round to their own grid — a run
+requesting `9:16` came back 716×1284 (0.5576, not 0.5625), which platforms
+pillarbox or reject. Matching the clips avoids distortion but does not give a
+platform-valid file, so normalise as the final encode:
+`crop=<w>:<w*16/9>, scale=720:1280:flags=lanczos, setsar=1`. Confirm with
+ffmpeg reporting `DAR 9:16`, and check a late frame to be sure the crop did
+not clip the captions.
+
 The script downloads everything, ducks each clip's native Seedance audio
 under the narration, burns chunked captions, holds the last frame if a take
 genuinely overruns, concatenates, and lays the music bed underneath with
