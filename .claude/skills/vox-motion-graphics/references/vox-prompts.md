@@ -90,6 +90,20 @@ as a plain closing sentence **inside the prompt**, because Seedance exposes no
 Pair each block with a `cameraMotion` value that matches its MOTION line —
 `pushIn` for a "listen to this" beat, `whipPan` between ideas, `crashZoomIn`
 on an impact, `fpvDrone` for a fake-oner, `overhead` for a map or grid.
+(Kling exposes no `cameraMotion`; there the move goes in prose.)
+
+**Splitting the template for the Kling start-frame path.** The one template
+above serves both engines — it just gets cut in two:
+
+- The **SCENE** line becomes the `images_generate` prompt for that block's
+  start frame, rewritten as a still composition, with the style key attached
+  as a `style` reference. Keep the EXCLUDE line on it.
+- The **MOTION** line becomes the `video_generate` prompt, describing only
+  what animates, plus the EXCLUDE line again.
+
+Do not restate the scene in the video prompt. Kling treats a full scene
+description as an instruction to redraw, and the block drifts off the still
+you already approved.
 
 The scene must visualize the narration's *idea*, not depict someone saying it.
 

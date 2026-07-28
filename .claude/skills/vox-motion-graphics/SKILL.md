@@ -63,7 +63,7 @@ fight the script you already wrote.
 
 | Setting    | Default                                | Override when… |
 |------------|----------------------------------------|----------------|
-| Video model| `bytedance-seedance-pro-2.0` (sota). Cost-sensitive or long runs → `bytedance-seedance-mini-2.0`; drafts → `bytedance-seedance-fast-2.0` | user names a model, or `video_models_list` shows a newer sota |
+| Video model| `bytedance-seedance-pro-2.0` (sota). Cost-sensitive or long runs → `bytedance-seedance-mini-2.0`; drafts → `bytedance-seedance-fast-2.0`. Budget or style-critical runs → the **Kling 2.5 start-frame path** below (10× cheaper, style locked in inspectable stills) | user names a model, or `video_models_list` shows a newer sota |
 | Image model| `imagen-nano-banana-2-flash` (Nano Banana 2). **Naming trap:** `imagen-nano-banana-2` is Nano Banana *Pro* — use it only for a final hero asset | user asks for max fidelity |
 | Aspect     | 9:16 vertical (shorts/TikTok/Reels). `aspectRatio` is a **required input** on every clip — always set it | user says YouTube/landscape → 16:9 |
 | Resolution | `720p` | user asks for 1080p/4K (pro-2.0 only) |
@@ -107,6 +107,7 @@ makes the reference-grade videos hit:
 | 1 Style key | generate one style swatch; its creation identifier is the key | `images_generate` |
 | 2 Script | N narration blocks, Vox formula, ~20–24 words each | reasoning (free) |
 | 3 Block prompts | N labeled video prompts in the Vox visual language | reasoning (free) — templates in `references/vox-prompts.md` |
+| 3b Start frames | Kling path only: N stills, style key attached to each | `images_generate` |
 | 4 Clips | N × 10s clips, style key referenced on every one | `video_generate` |
 | 5 Voice | one narrator, N takes, same `voiceId` on every block | `audio_voices_list` + `audio_tts` |
 | 5b Music | one instrumental bed the length of the video | `audio_music_generate` |
@@ -264,6 +265,64 @@ an image first: generate the still with `images_generate`, then pass it as
 constraint — `keyframes` is **prohibited with** `references` of type `image`
 or `video`, though a `style` reference is still allowed alongside it.
 
+### Alternative engine — the Kling 2.5 start-frame path
+
+`kling-25` at 720p costs **280 credits per 10s clip** against Seedance Pro's
+2,800. Its constraints look hostile and turn out to be an advantage:
+
+| Constraint (from `video_models_list`) | Consequence |
+|---|---|
+| `supportsReferences: false` | The style key **cannot** attach to the video model at all |
+| `keyframes.start` `requiredIf: 720p` | Every clip **must** be seeded with a start image |
+| `keyframes.end` `prohibitedIf: 720p` | Do not send an end frame at 720p |
+| `supportsSoundEffects: false` | No native SFX bed — audio is narration + music only |
+| `durations: [5, 10]` | Only those two lengths; no 8s or 12s beats |
+| `prompt.maxLength: 2500` | A quarter of Seedance's budget — trim block prompts |
+| no `cameraMotion` field | Camera moves must be written in prose |
+
+The second constraint answers the first. Because every clip needs a start
+frame anyway, generate each block's opening still with `images_generate` —
+which **does** support references — and attach the style key there:
+
+```
+images_generate                       # once per block, count: 1
+  prompt: <the block's SCENE line, written as a still composition>
+  mode: "imagen-nano-banana-2-flash"
+  aspectRatio: "9:16"
+  references: [ { type: "style", identifier: "<style key identifier>" } ]
+```
+
+Then animate each still, describing only what *moves*:
+
+```
+video_generate
+  video:
+    clips:
+      - slug: "kling-25"
+        prompt: <MOTION only — what animates, plus inline exclusions>
+        duration: 10                  # or 5
+        aspectRatio: "9:16"
+        resolution: "720p"
+        keyframes:
+          start: { type: "image", url: "<block still identifier>" }
+```
+
+Six clips can go in a single `video_generate` call as six `clips[]` entries.
+
+**Why prefer this path even when budget is not the constraint:** the look is
+locked in six stills you can inspect *before* spending anything on video, and
+style consistency comes from one image model with a real style reference
+rather than from six independent video generations. Split the prompt cleanly
+— composition belongs in the still, motion belongs in the clip. Repeating the
+scene description in the video prompt makes Kling redraw it and drift.
+
+At **1080p** the trade flips: the start frame becomes optional and end frames
+are allowed, so 1080p Kling behaves like an ordinary text-to-video model with
+no style control at all. If a run is 1080p, prefer Seedance.
+
+Assembly note: set `"sfx_gain": 0.0` in the manifest, since these clips are
+silent and there is no native bed to duck.
+
 ## Phase 5 — Voiceover
 
 1. Default to `voiceId: 350` (Henry Beckett). To pick differently, call
@@ -357,6 +416,18 @@ script falls back through Oswald → Liberation Sans Narrow → a condensed
 Liberation/DejaVu Sans (ScaleX 88), which reads correctly. Dropping
 `Anton-Regular.ttf` into a system font dir upgrades it automatically.
 
+**If the asset CDN is unreachable.** Some sandboxes allow the Magnific MCP
+but block egress to the CDN the finished assets live on (`pikaso.cdnpk.net`),
+so generation succeeds while every download 403s. Check early — one `curl` on
+a style-key URL right after Phase 1 costs nothing and tells you whether the
+run can be assembled at all. If it is blocked, do not route around the policy.
+Say so before spending on clips, and offer the reduced deliverable:
+`video_concatenate` gives one joined MP4 server-side (clip audio only — silent
+on the Kling path), plus the narration and music as separate files. Hand the
+user a filled-in `manifest.json` and `scripts/assemble.py` so they can finish
+the mux on a machine with network access, and warn them that asset URLs carry
+an expiry in the query string.
+
 Finally, present the MP4 to the user. Use `creations_show` for any Magnific
 creations worth previewing inline; send the assembled local file directly.
 
@@ -376,6 +447,16 @@ unasked — a titles/description/tags pass if the video is headed to YouTube.
   move exclusions inline into the prompt text.
 - `references` rejected alongside `keyframes` → `image`/`video` references
   are prohibited with keyframes; drop to a `style` reference only.
+- Kling rejects a `references` array outright → `kling-25` has
+  `supportsReferences: false`; the style must come from the start frame.
+- Kling 720p rejects the submission for a missing start frame → the frame is
+  required at that resolution; generate the still first. The same call fails
+  if you send an end frame, which is prohibited at 720p.
+- Kling clip redraws the scene instead of animating it → the video prompt is
+  repeating the composition. Strip it back to motion only and let the start
+  frame carry the scene.
+- Final video is silent on the Kling path → expected, `supportsSoundEffects:
+  false`. Set `sfx_gain: 0.0` and rely on narration plus music.
 - Creation stuck non-terminal → `creations_wait` returns `poll_after_seconds`;
   respect it and poll again rather than resubmitting (resubmitting double-charges).
 - Video job fails with no error text → moderation, not bad luck. Check the
