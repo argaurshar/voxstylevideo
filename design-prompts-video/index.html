@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>15 design prompts — 9:16 reel</title>
+<style>
+  @font-face{font-family:'Inter';src:url('fonts/Inter-300.ttf') format('truetype');font-weight:300;font-display:block}
+  @font-face{font-family:'Inter';src:url('fonts/Inter-400.ttf') format('truetype');font-weight:400;font-display:block}
+  @font-face{font-family:'Inter';src:url('fonts/Inter-600.ttf') format('truetype');font-weight:600;font-display:block}
+  @font-face{font-family:'Inter';src:url('fonts/Inter-800.ttf') format('truetype');font-weight:800;font-display:block}
+  @font-face{font-family:'JBMono';src:url('fonts/JBMono-400.ttf') format('truetype');font-weight:400;font-display:block}
+  @font-face{font-family:'JBMono';src:url('fonts/JBMono-500.ttf') format('truetype');font-weight:500;font-display:block}
+  @font-face{font-family:'JBMono';src:url('fonts/JBMono-700.ttf') format('truetype');font-weight:700;font-display:block}
+
+  /* Claude's palette: warm ivory ground, near-black ink, terracotta accent */
+  :root{
+    --cream:#F0EEE6;
+    --cream-hi:#F7F5EF;
+    --ink:#141413;
+    --ink-soft:#3D3D3A;
+    --clay:#D97757;
+    --clay-deep:#BD5D3A;
+    --muted:#91918D;
+    --rule:#D9D5C8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000}
+  body{width:1080px;height:1920px;overflow:hidden}
+
+  #stage{position:relative;width:1080px;height:1920px;background:var(--cream);
+         overflow:hidden;transform-origin:50% 48%;-webkit-font-smoothing:antialiased}
+  .abs{position:absolute}
+  #tint{position:absolute;inset:0;pointer-events:none;
+        background:radial-gradient(118% 74% at 50% 26%,var(--cream-hi) 0%,transparent 60%)}
+  #fx{position:absolute;left:0;top:0}
+  #grain{position:absolute;inset:0;pointer-events:none;opacity:.045;mix-blend-mode:multiply}
+  #vign{position:absolute;inset:0;pointer-events:none;
+        background:radial-gradient(124% 86% at 50% 42%,transparent 54%,rgba(20,20,19,.13) 100%)}
+
+  /* ---------- persistent chrome ---------- */
+  #phase{right:84px;top:128px;font-family:'JBMono',monospace;font-size:21px;font-weight:500;
+         letter-spacing:.22em;color:var(--clay);text-align:right;white-space:nowrap}
+  #meter{left:84px;top:200px;width:912px;height:5px}
+  #meter i{position:absolute;top:0;width:55px;height:4px;background:var(--rule)}
+  #meter i.on{background:var(--clay)}
+
+  #idx{left:84px;top:238px;font-family:'Inter',sans-serif;font-weight:800;font-size:62px;
+       line-height:62px;letter-spacing:-.03em;color:var(--clay);font-variant-numeric:tabular-nums}
+  #idx span{font-size:26px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+
+  /* ---------- topic block ---------- */
+  #title{left:84px;top:694px;width:912px;text-align:center;font-family:'Inter',sans-serif;
+         font-weight:800;font-size:78px;line-height:88px;letter-spacing:-.032em;color:var(--ink)}
+  #line{left:84px;top:816px;width:912px;text-align:center;font-family:'Inter',sans-serif;
+        font-weight:600;font-size:54px;line-height:66px;letter-spacing:-.016em;color:var(--clay-deep)}
+  #line .w{display:inline-block}
+
+  #card{left:84px;top:1062px;width:912px;height:258px;border:1px solid var(--rule);
+        background:rgba(247,245,239,.9)}
+  #plabel{position:absolute;left:40px;top:32px;font-family:'JBMono',monospace;font-size:16px;
+          font-weight:500;letter-spacing:.24em;color:var(--clay)}
+  #ptext{position:absolute;left:40px;top:82px;width:832px;font-family:'JBMono',monospace;
+         font-size:24px;line-height:39px;color:var(--ink-soft)}
+  .caret{display:inline-block;width:11px;height:25px;background:var(--clay);
+         vertical-align:-3px;margin-left:3px}
+
+  /* ---------- marquee + footer ---------- */
+  #marq{left:0;top:1514px;width:1080px;height:40px;overflow:hidden}
+  #marqIn{position:absolute;left:0;top:0;white-space:nowrap;font-family:'JBMono',monospace;
+          font-size:26px;font-weight:400;letter-spacing:.06em;color:var(--muted)}
+  #marqIn b{color:var(--clay);font-weight:400;margin:0 22px}
+  #foot{left:84px;top:1600px;width:912px;text-align:center;font-family:'JBMono',monospace;
+        font-size:19px;font-weight:500;letter-spacing:.26em;color:var(--muted)}
+
+  /* ---------- hook ---------- */
+  #h1{left:84px;top:930px;width:912px;text-align:center;font-family:'Inter',sans-serif;
+      font-weight:800;font-size:118px;line-height:118px;letter-spacing:-.04em;color:var(--ink)}
+  #h2{left:84px;top:1090px;width:912px;text-align:center;font-family:'Inter',sans-serif;
+      font-weight:600;font-size:56px;line-height:70px;letter-spacing:-.018em;color:var(--clay-deep)}
+  #h3{left:84px;top:1290px;width:912px;text-align:center;font-family:'JBMono',monospace;
+      font-size:22px;font-weight:500;letter-spacing:.26em;color:var(--muted)}
+
+  /* ---------- cta ---------- */
+  #c1{left:84px;top:860px;width:912px;text-align:center;font-family:'Inter',sans-serif;
+      font-weight:600;font-size:58px;line-height:66px;letter-spacing:-.016em;color:var(--ink)}
+  #c2{left:84px;top:940px;width:912px;text-align:center;font-family:'Inter',sans-serif;
+      font-weight:800;font-size:158px;line-height:170px;letter-spacing:-.045em;color:var(--clay)}
+  #c3{left:84px;top:1140px;width:912px;text-align:center;font-family:'Inter',sans-serif;
+      font-weight:600;font-size:46px;line-height:60px;letter-spacing:-.014em;color:var(--ink-soft)}
+  #c4{left:84px;top:1290px;width:912px;text-align:center;font-family:'JBMono',monospace;
+      font-size:20px;font-weight:500;letter-spacing:.26em;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="tint"></div>
+  <canvas id="fx" width="1080" height="1920"></canvas>
+
+  <div id="phase" class="abs"></div>
+  <div id="meter" class="abs"></div>
+  <div id="idx" class="abs"></div>
+
+  <div id="title" class="abs"></div>
+  <div id="line" class="abs"></div>
+  <div id="card" class="abs">
+    <div id="plabel">PROMPT</div>
+    <div id="ptext"></div>
+  </div>
+
+  <div id="marq" class="abs"><div id="marqIn"></div></div>
+  <div id="foot" class="abs">FULL PROMPT IN THE CAPTION</div>
+
+  <div id="h1" class="abs"></div>
+  <div id="h2" class="abs"></div>
+  <div id="h3" class="abs">FOR ARCHITECTS &amp; INTERIOR DESIGNERS</div>
+
+  <div id="c1" class="abs">Comment</div>
+  <div id="c2" class="abs">DESIGN</div>
+  <div id="c3" class="abs">and I'll send you the full set.</div>
+  <div id="c4" class="abs">ALL 15 PROMPTS · FREE</div>
+
+  <canvas id="grain" width="1080" height="1920"></canvas>
+  <div id="vign"></div>
+</div>
+
+<script>
+/* ============================================================
+   15 design prompts — 1080x1920, 54s, silent.
+   The page never animates on its own: it exposes renderFrame(t)
+   so the renderer can drive it one frame at a time.
+   ============================================================ */
+const W = 1080, H = 1920;
+const HOOK = 4.0;      // hook runs 0 -> 4
+const PER  = 3.0;      // seconds per topic
+const CTA  = 49.0;     // 4 + 15*3
+const DURATION = 54.0;
+window.VIDEO_DURATION = DURATION;
+
+/* ---------- math ---------- */
+const clamp = (v, a = 0, b = 1) => v < a ? a : v > b ? b : v;
+const lerp  = (a, b, k) => a + (b - a) * k;
+const win   = (t, t0, t1) => clamp((t - t0) / (t1 - t0));
+const outCubic = k => 1 - Math.pow(1 - k, 3);
+const outQuint = k => 1 - Math.pow(1 - k, 5);
+const outBack  = k => { const c = 1.62; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const hash = i => { const x = Math.sin(i * 127.1 + 11.7) * 43758.5453; return x - Math.floor(x); };
+
+const CLAY = '#D97757', CLAY_DEEP = '#BD5D3A', INK = '#141413', RULE = '#D9D5C8';
+
+/* ---------- the content ---------- */
+const TOPICS = [
+  { title:'Design Brief',      line:'Start with a full brief.',            phase:'01 · FOUNDATION',
+    prompt:'Act as a senior architect. Create a complete design brief for a [project type]: client goals, program, style direction, budget, timeline, constraints.' },
+  { title:'Project Standards', line:'Set your studio standards.',          phase:'02 · FOUNDATION',
+    prompt:'Create a project standards document: material palette guidelines, drawing conventions, file naming, client comms tone, and a pre-delivery QC checklist.' },
+  { title:'Concept Mode',      line:'Generate three concept directions.',  phase:'03 · CONCEPT',
+    prompt:'Based on this brief, generate three distinct concept directions. For each: the big idea, mood, material and colour direction, spatial strategy, precedent.' },
+  { title:'Spec Sheets',       line:'Spec every material fast.',           phase:'04 · CONCEPT',
+    prompt:'Create a full material and finish spec sheet for [space]: flooring, walls, ceiling, lighting, hardware, upholstery — with finish codes, supplier, cost.' },
+  { title:'Space Planning',    line:'Plan the client journey.',            phase:'05 · CONCEPT',
+    prompt:'Given this program and area, propose a space plan optimising flow, daylight, privacy zones and the client journey from entry to key destinations.' },
+  { title:'CD Checklist',      line:'Plan your CD set.',                   phase:'06 · DOCUMENTATION',
+    prompt:'Create a CD checklist for [project type]: plans, RCPs, elevations, sections, details, schedules, MEP coordination — with scale and sheet numbering.' },
+  { title:'Coordination',      line:'Coordinate engineers in one shot.',   phase:'07 · DOCUMENTATION',
+    prompt:'Draft a coordination request to the [structural/MEP] consultant: project overview, coordination items, referenced drawings, response deadline.' },
+  { title:'Vendor Database',   line:'Build your vendor database.',         phase:'08 · DOCUMENTATION',
+    prompt:'Organise a vendor and materials database: category, vendor, contact, lead time, price tier, sustainability rating, and past project notes.' },
+  { title:'Code Gaps',         line:'Catch code gaps early.',              phase:'09 · SITE & CODE',
+    prompt:'Review this scope against [jurisdiction] code for [occupancy]. Flag gaps in egress, accessibility, fire rating and occupancy load to verify.' },
+  { title:'RFI Response',      line:'Answer an RFI fast.',                 phase:'10 · SITE & CODE',
+    prompt:'Draft an RFI response for this site issue: problem summary, resolution options with pros and cons, schedule and cost impact, recommended path.' },
+  { title:'Punch List',        line:'Run the final walkthrough.',          phase:'11 · SITE & CODE',
+    prompt:'Create a final walkthrough and punch list by area: item description, trade responsible, priority, completion status, plus client sign-off.' },
+  { title:'Drawing Cleanup',   line:'Clean up your drawing set.',          phase:'12 · STANDARDS',
+    prompt:'Review this sheet list and identify redundant or superseded drawings to archive. Return a clean current sheet index by discipline and phase.' },
+  { title:'Revision Log',      line:'Write clean revision logs.',          phase:'13 · STANDARDS',
+    prompt:'Write a professional revision log entry for this update: revision number, date, description, reason for change, and affected sheets.' },
+  { title:'Guardrails',        line:'Turn standards into guardrails.',     phase:'14 · STANDARDS',
+    prompt:'Turn our design standards into a one-page guardrails checklist: drawing quality, material consistency, brand alignment, code basics.' },
+  { title:'Reusable Template', line:'Make it a repeatable template.',      phase:'15 · SYSTEM',
+    prompt:'Take this one-off process and turn it into a reusable template or SOP: step-by-step instructions, required inputs, and a final checklist.' }
+];
+
+const el = {};
+['stage','fx','grain','phase','meter','idx','title','line','card','ptext','marq','marqIn','foot',
+ 'h1','h2','h3','c1','c2','c3','c4'].forEach(id => el[id] = document.getElementById(id));
+
+let g, marqW = 0, lastTitle = '', lastLine = '';
+
+/* ============================================================
+   the Claude spark — a radiating burst of tapered petals
+   ============================================================ */
+const PETALS = [1, .60, .88, .54, 1, .70, .95, .57, 1, .65, .90];
+function spark(cx, cy, R, p, rot, color, alpha) {
+  if (p <= 0 || alpha <= 0.002) return;
+  g.save();
+  g.globalAlpha = alpha;
+  g.translate(cx, cy);
+  g.rotate(rot);
+  g.fillStyle = color;
+  for (let i = 0; i < PETALS.length; i++) {
+    const q = outBack(clamp((p - i * 0.05) / 0.42));
+    if (q <= 0) continue;
+    const L = R * PETALS[i] * q;
+    const w = R * 0.082;
+    g.save();
+    g.rotate((i / PETALS.length) * Math.PI * 2);
+    g.beginPath();
+    g.moveTo(-w, -R * 0.09);
+    g.quadraticCurveTo(-w * 0.46, -L * 0.58, 0, -L);
+    g.quadraticCurveTo(w * 0.46, -L * 0.58, w, -R * 0.09);
+    g.quadraticCurveTo(0, R * 0.02, -w, -R * 0.09);
+    g.closePath();
+    g.fill();
+    g.restore();
+  }
+  g.restore();
+}
+
+/* ============================================================
+   15 line glyphs, each drawn on rather than faded in
+   ============================================================ */
+/* progress of primitive i out of n, given overall draw progress p */
+const sub = (p, i, n) => clamp((p - i * (0.60 / n)) / 0.44);
+
+function seg(x1, y1, x2, y2, q) {
+  if (q <= 0) return;
+  g.beginPath(); g.moveTo(x1, y1); g.lineTo(lerp(x1, x2, q), lerp(y1, y2, q)); g.stroke();
+}
+function poly(pts, q, close) {
+  const n = pts.length - (close ? 0 : 1);
+  for (let i = 0; i < n; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
+    seg(a[0], a[1], b[0], b[1], clamp(q * n - i));
+  }
+}
+function box(x, y, w, h, q) {
+  poly([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], q, true);
+}
+function ring(cx, cy, r, q, from) {
+  if (q <= 0) return;
+  const a0 = from === undefined ? -Math.PI / 2 : from;
+  g.beginPath(); g.arc(cx, cy, r, a0, a0 + Math.PI * 2 * q); g.stroke();
+}
+function dot(x, y, r, q) {
+  if (q <= 0) return;
+  g.beginPath(); g.arc(x, y, r * q, 0, Math.PI * 2); g.fill();
+}
+function tick(x, y, s, q) {                       /* a checkmark */
+  poly([[x, y], [x + s * 0.36, y + s * 0.38], [x + s, y - s * 0.42]], q, false);
+}
+
+const GLYPHS = [
+  /* 01 brief — a document with lines */
+  p => { box(46, 26, 208, 248, sub(p, 0, 5));
+         [0, 1, 2, 3].forEach(i => seg(80, 88 + i * 42, i === 3 ? 168 : 220, 88 + i * 42, sub(p, i + 1, 5))); },
+  /* 02 standards — a rule set, one item confirmed */
+  p => { [[58, 58], [162, 58], [58, 162]].forEach((c, i) => box(c[0], c[1], 80, 80, sub(p, i, 5)));
+         box(162, 162, 80, 80, sub(p, 3, 5));
+         g.strokeStyle = CLAY; tick(180, 200, 46, sub(p, 4, 5)); },
+  /* 03 concept — three overlapping directions */
+  p => { ring(112, 118, 64, sub(p, 0, 3)); ring(188, 118, 64, sub(p, 1, 3)); ring(150, 186, 64, sub(p, 2, 3)); },
+  /* 04 spec — a row of finish swatches */
+  p => { [40, 100, 160, 220].forEach((x, i) => { box(x, 112, 50, 84, sub(p, i, 6));
+           seg(x + 6, 82, x + 44, 82, sub(p, i + 1, 6)); });
+         g.strokeStyle = CLAY; box(160, 112, 50, 84, sub(p, 5, 6)); },
+  /* 05 space plan — rooms, a wall and a door swing */
+  p => { box(38, 44, 224, 190, sub(p, 0, 5));
+         seg(152, 44, 152, 158, sub(p, 1, 5));
+         seg(152, 158, 262, 158, sub(p, 2, 5));
+         seg(70, 234, 70, 274, sub(p, 3, 5));
+         g.strokeStyle = CLAY; ring(70, 274, 44, sub(p, 4, 5) * 0.25, -Math.PI / 2); },
+  /* 06 CD set — a stack of sheets */
+  p => { box(74, 24, 176, 196, sub(p, 0, 3)); box(58, 52, 176, 196, sub(p, 1, 3));
+         g.strokeStyle = CLAY; box(42, 80, 176, 196, sub(p, 2, 3)); },
+  /* 07 coordination — a hub and three consultants */
+  p => { const N = [[62, 68], [244, 68], [152, 258]];
+         N.forEach((n, i) => seg(152, 150, n[0], n[1], sub(p, i, 5)));
+         g.strokeStyle = CLAY; ring(152, 150, 30, sub(p, 3, 5));
+         g.strokeStyle = INK; N.forEach(n => ring(n[0], n[1], 22, sub(p, 4, 5))); },
+  /* 08 database — a table */
+  p => { box(38, 58, 224, 184, sub(p, 0, 5));
+         g.strokeStyle = CLAY; seg(38, 104, 262, 104, sub(p, 1, 5)); g.strokeStyle = INK;
+         seg(38, 150, 262, 150, sub(p, 2, 5)); seg(38, 196, 262, 196, sub(p, 3, 5));
+         seg(112, 58, 112, 242, sub(p, 4, 5)); seg(188, 58, 188, 242, sub(p, 4, 5)); },
+  /* 09 code — a shield with a flag */
+  p => { poly([[150, 32], [256, 76], [256, 152], [150, 268], [44, 152], [44, 76]], sub(p, 0, 3), true);
+         g.strokeStyle = CLAY; seg(150, 104, 150, 176, sub(p, 1, 3));
+         g.fillStyle = CLAY; dot(150, 208, 9, sub(p, 2, 3)); },
+  /* 10 RFI — a question coming back answered */
+  p => { box(42, 56, 216, 148, sub(p, 0, 4));
+         poly([[92, 204], [92, 246], [136, 204]], sub(p, 1, 4), false);
+         g.strokeStyle = CLAY; ring(150, 112, 26, sub(p, 2, 4) * 0.72, -Math.PI * 0.95);
+         seg(150, 138, 150, 152, sub(p, 2, 4));
+         g.fillStyle = CLAY; dot(150, 170, 8, sub(p, 3, 4)); },
+  /* 11 punch list — a clipboard of resolved items */
+  p => { box(62, 48, 176, 212, sub(p, 0, 5)); box(122, 34, 56, 28, sub(p, 1, 5));
+         g.strokeStyle = CLAY;
+         [0, 1, 2].forEach(i => { tick(92, 116 + i * 52, 34, sub(p, i + 2, 5));
+           g.strokeStyle = INK; seg(146, 108 + i * 52, 214, 108 + i * 52, sub(p, i + 2, 5)); g.strokeStyle = CLAY; }); },
+  /* 12 cleanup — a superseded sheet pulled out of the set */
+  p => { box(60, 30, 168, 190, sub(p, 0, 4)); box(44, 58, 168, 190, sub(p, 1, 4));
+         g.strokeStyle = CLAY;
+         poly([[86, 116], [170, 200]], sub(p, 2, 4), false);
+         poly([[170, 116], [86, 200]], sub(p, 2, 4), false);
+         seg(232, 264, 276, 264, sub(p, 3, 4)); poly([[262, 250], [276, 264], [262, 278]], sub(p, 3, 4), false); },
+  /* 13 revision — a revision delta over the log */
+  p => { poly([[150, 40], [246, 196], [54, 196]], sub(p, 0, 4), true);
+         g.strokeStyle = CLAY; seg(150, 96, 150, 146, sub(p, 1, 4)); g.strokeStyle = INK;
+         seg(54, 234, 246, 234, sub(p, 2, 4)); seg(54, 268, 182, 268, sub(p, 3, 4)); },
+  /* 14 guardrails — a rail you cannot pass */
+  p => { seg(76, 122, 76, 262, sub(p, 0, 4)); seg(224, 122, 224, 262, sub(p, 1, 4));
+         g.strokeStyle = CLAY; seg(46, 152, 254, 152, sub(p, 2, 4));
+         seg(46, 196, 254, 196, sub(p, 3, 4)); },
+  /* 15 template — the process closed into a loop */
+  p => { box(104, 104, 92, 92, sub(p, 0, 3));
+         g.strokeStyle = CLAY; ring(150, 150, 108, sub(p, 1, 3) * 0.84, -Math.PI * 0.42);
+         poly([[196, 52], [232, 62], [206, 92]], sub(p, 2, 3), true); }
+];
+
+/* ============================================================
+   prepare()
+   ============================================================ */
+window.prepare = async function () {
+  el.meter.innerHTML = TOPICS.map((_, i) => `<i style="left:${i * 61}px"></i>`).join('');
+
+  /* the marquee content is doubled so the scroll can wrap seamlessly */
+  const strip = TOPICS.map(x => x.title.toUpperCase()).join('<b>◆</b>') + '<b>◆</b>';
+  el.marqIn.innerHTML = strip + strip;
+
+  g = el.fx.getContext('2d');
+
+  const gc = el.grain.getContext('2d');
+  const img = gc.createImageData(W, H);
+  let seed = 20260731;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = 150 + rnd() * 105;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = 255;
+  }
+  gc.putImageData(img, 0, 0);
+
+  await document.fonts.ready;
+  marqW = el.marqIn.scrollWidth / 2;
+  renderFrame(0);
+};
+
+/* type `s` out over progress p, with a caret while it runs */
+function typeInto(node, s, p) {
+  const n = Math.round(s.length * clamp(p));
+  node.innerHTML = s.slice(0, n).replace(/&/g, '&amp;').replace(/</g, '&lt;') +
+                   (p < 1 ? '<i class="caret"></i>' : '');
+}
+
+const show = (node, o) => { node.style.opacity = o.toFixed(4); };
+
+/* ============================================================
+   renderFrame(t)
+   ============================================================ */
+window.renderFrame = function (t) {
+  t = clamp(t, 0, DURATION);
+  g.clearRect(0, 0, W, H);
+  g.lineWidth = 6;
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+
+  /* a slow push-in so no frame is completely still */
+  el.stage.style.transform = `scale(${lerp(1, 1.03, t / DURATION).toFixed(5)})`;
+
+  const inHook  = t < HOOK;
+  const inCta   = t >= CTA;
+  const ti      = clamp(Math.floor((t - HOOK) / PER), 0, TOPICS.length - 1);
+  const u       = t - (HOOK + ti * PER);          /* local time inside the topic */
+  const topic   = TOPICS[ti];
+
+  /* ---------- the mark, top left, always turning ----------
+     it only takes over once the hook's hero spark has left, so the two
+     never sit on screen at the same time */
+  const markA = inHook ? 0 : inCta ? 1 - win(t, CTA, CTA + 0.4) : 1;
+  spark(112, 146, 30, 1, t * 0.075, CLAY, markA * 0.95);
+
+  /* ---------- hook ---------- */
+  if (inHook || t < HOOK + 0.4) {
+    const out = win(t, HOOK - 0.35, HOOK);
+    spark(540, 560, 168, win(t, 0.15, 1.1), 0.2 + t * 0.10, CLAY, 1 - out);
+
+    typeInto(el.h1, '15 prompts.', win(t, 0.85, 1.75));
+    show(el.h1, (1 - out) * outCubic(win(t, 0.8, 1.0)));
+    el.h1.style.transform = `translateY(${(-26 * out).toFixed(1)}px)`;
+
+    el.h2.innerHTML = 'One for every stage<br>of a design project.';
+    show(el.h2, (1 - out) * outQuint(win(t, 1.85, 2.5)));
+    el.h2.style.transform = `translateY(${(lerp(28, 0, outQuint(win(t, 1.85, 2.5))) - 18 * out).toFixed(1)}px)`;
+
+    show(el.h3, (1 - out) * outCubic(win(t, 2.6, 3.1)));
+  } else {
+    show(el.h1, 0); show(el.h2, 0); show(el.h3, 0);
+  }
+
+  /* ---------- topic block ---------- */
+  const topicOn = !inHook && !inCta;
+  if (topicOn) {
+    const io = outQuint(win(u, 0, 0.55));                 /* in  */
+    const oo = win(u, PER - 0.30, PER);                   /* out */
+    const live = (1 - oo);
+
+    show(el.phase, live * outCubic(win(u, 0.05, 0.45)));
+    el.phase.textContent = topic.phase;
+
+    [...el.meter.children].forEach((n, i) => n.className = i <= ti ? 'on' : '');
+    show(el.meter, 1);
+
+    el.idx.innerHTML = String(ti + 1).padStart(2, '0') + '<span> / 15</span>';
+    show(el.idx, live * io);
+    el.idx.style.transform = `translateY(${(lerp(22, 0, io) - 14 * oo).toFixed(1)}px)`;
+
+    /* glyph, drawn on inside its 300x300 box */
+    g.save();
+    g.translate(390, 356);
+    g.globalAlpha = live;
+    g.strokeStyle = INK; g.fillStyle = INK;
+    GLYPHS[ti](outCubic(win(u, 0.12, 1.05)));
+    g.restore();
+
+    if (lastTitle !== topic.title) lastTitle = topic.title;
+    typeInto(el.title, topic.title, win(u, 0.30, 0.95));
+    show(el.title, live * outCubic(win(u, 0.28, 0.5)));
+    el.title.style.transform = `translateY(${(-16 * oo).toFixed(1)}px)`;
+
+    if (lastLine !== topic.line) {
+      lastLine = topic.line;
+      el.line.innerHTML = topic.line.split(' ').map(w => `<span class="w">${w}</span>`).join(' ');
+    }
+    const words = el.line.querySelectorAll('.w');
+    words.forEach((w, i) => {
+      const q = outQuint(win(u, 0.80 + i * 0.045, 0.80 + i * 0.045 + 0.5));
+      w.style.opacity = q.toFixed(3);
+      w.style.transform = `translateY(${((1 - q) * 24).toFixed(1)}px)`;
+    });
+    show(el.line, live);
+
+    show(el.card, live * outCubic(win(u, 1.05, 1.4)));
+    el.card.style.transform = `translateY(${(lerp(18, 0, outQuint(win(u, 1.05, 1.6))) - 10 * oo).toFixed(1)}px)`;
+    typeInto(el.ptext, topic.prompt, win(u, 1.25, 2.62));
+
+    show(el.foot, live * outCubic(win(u, 1.7, 2.1)));
+  } else {
+    show(el.idx, 0); show(el.title, 0); show(el.line, 0); show(el.card, 0);
+    if (inHook) { show(el.phase, 0); show(el.meter, 0); show(el.foot, 0); }
+  }
+
+  /* ---------- cta ---------- */
+  if (inCta) {
+    const v = t - CTA;
+    show(el.phase, 0);
+    [...el.meter.children].forEach(n => n.className = 'on');
+    show(el.meter, 1 - win(v, 0.3, 0.7));
+    show(el.foot, 0);
+
+    spark(540, 604, 150, win(v, 0.1, 1.0), 0.2 + t * 0.10, CLAY, outCubic(win(v, 0.05, 0.5)));
+
+    show(el.c1, outQuint(win(v, 0.55, 1.0)));
+    el.c1.style.transform = `translateY(${lerp(20, 0, outQuint(win(v, 0.55, 1.0))).toFixed(1)}px)`;
+
+    const pop = outBack(win(v, 0.85, 1.6));
+    show(el.c2, outCubic(win(v, 0.85, 1.1)));
+    el.c2.style.transform = `scale(${lerp(0.88, 1, pop).toFixed(4)})`;
+
+    show(el.c3, outQuint(win(v, 1.55, 2.1)));
+    el.c3.style.transform = `translateY(${lerp(20, 0, outQuint(win(v, 1.55, 2.1))).toFixed(1)}px)`;
+
+    show(el.c4, outCubic(win(v, 2.2, 2.7)));
+  } else {
+    show(el.c1, 0); show(el.c2, 0); show(el.c3, 0); show(el.c4, 0);
+  }
+
+  /* ---------- the marquee runs the whole way through ---------- */
+  el.marqIn.style.transform = `translateX(${(-((t * 62) % marqW)).toFixed(1)}px)`;
+  show(el.marq, inHook ? outCubic(win(t, 3.2, 3.8)) : inCta ? 1 - win(t - CTA, 2.9, 3.4) : 1);
+};
+</script>
+</body>
+</html>
