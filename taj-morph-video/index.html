@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Taj Mahal aerial morph — 9:16</title>
+<style>
+  @font-face{font-family:'Inter';src:url('fonts/Inter-600.ttf') format('truetype');font-weight:600;font-display:block}
+  @font-face{font-family:'Inter';src:url('fonts/Inter-800.ttf') format('truetype');font-weight:800;font-display:block}
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000}
+  body{width:1080px;height:1920px;overflow:hidden}
+
+  #stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#0b0b0c;
+         -webkit-font-smoothing:antialiased}
+
+  /* both plates carry the same push-in, so the wipe reads as one place
+     changing rather than two pictures sliding past each other */
+  .plate{position:absolute;inset:0;background-position:50% 50%;background-size:cover;
+         transform-origin:50% 50%;will-change:transform}
+  #sat {background-image:url('assets/sat.jpg')}
+  #real{background-image:url('assets/real.jpg')}
+
+  /* the seam: a soft warm edge that travels with the wipe */
+  #seam{position:absolute;top:0;bottom:0;width:150px;margin-left:-75px;pointer-events:none;
+        background:linear-gradient(90deg,
+          rgba(255,214,170,0) 0%,
+          rgba(255,214,170,.10) 42%,
+          rgba(255,236,214,.62) 50%,
+          rgba(255,214,170,.10) 58%,
+          rgba(255,214,170,0) 100%)}
+  #seamLine{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;pointer-events:none;
+            background:rgba(255,244,228,.55)}
+
+  /* legibility wash under the caption, only while the caption is up */
+  #wash{position:absolute;left:0;right:0;top:700px;height:640px;pointer-events:none;
+        background:radial-gradient(72% 52% at 50% 50%,rgba(8,10,14,.60) 0%,rgba(8,10,14,0) 72%)}
+
+  #cta{position:absolute;left:0;top:806px;width:1080px;text-align:center;color:#fff;
+       font-family:'Inter',sans-serif;text-shadow:0 6px 34px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.4)}
+  #l1{font-weight:800;font-size:86px;line-height:96px;letter-spacing:.014em}
+  #l2{font-weight:800;font-size:172px;line-height:184px;letter-spacing:-.01em;
+      transform:skewX(-9deg);display:inline-block}
+  #l3{font-weight:800;font-size:86px;line-height:96px;letter-spacing:.014em}
+  .ln{display:block}
+
+  #vign{position:absolute;inset:0;pointer-events:none;
+        background:radial-gradient(120% 78% at 50% 46%,transparent 56%,rgba(0,0,0,.34) 100%)}
+  #grain{position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="sat"  class="plate"></div>
+  <div id="real" class="plate"></div>
+  <div id="seam"></div>
+  <div id="seamLine"></div>
+
+  <div id="wash"></div>
+  <div id="cta">
+    <span class="ln" id="l1">COMMENT</span>
+    <span class="ln"><span id="l2">&ldquo;AI&rdquo;</span></span>
+    <span class="ln" id="l3">FOR THE PROMPT</span>
+  </div>
+
+  <canvas id="grain" width="1080" height="1920"></canvas>
+  <div id="vign"></div>
+</div>
+
+<script>
+/* ============================================================
+   Satellite plate -> photoreal aerial plate, revealed by a
+   left-to-right wipe, under a continuous push-in.
+   The page never animates on its own: renderFrame(t) drives it.
+   ============================================================ */
+const W = 1080, H = 1920;
+const DURATION = 10.0;
+window.VIDEO_DURATION = DURATION;
+
+const WIPE_END  = 8.20;   // the wipe finishes here, then the render holds
+const CTA_IN    = 8.40;   // caption lands with time left to actually read it
+const ZOOM_TO   = 1.22;   // push-in over the full clip
+
+const clamp = (v, a = 0, b = 1) => v < a ? a : v > b ? b : v;
+const lerp  = (a, b, k) => a + (b - a) * k;
+const win   = (t, t0, t1) => clamp((t - t0) / (t1 - t0));
+const outCubic = k => 1 - Math.pow(1 - k, 3);
+const outQuint = k => 1 - Math.pow(1 - k, 5);
+const outBack  = k => { const c = 1.5; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+/* gentle ease at both ends, near-linear through the middle — matches the
+   reference, where the boundary crosses the frame at a steady rate */
+const smooth = k => k * k * (3 - 2 * k);
+
+const el = {};
+['stage','sat','real','seam','seamLine','wash','cta','l1','l2','l3','grain']
+  .forEach(id => el[id] = document.getElementById(id));
+
+window.prepare = async function () {
+  const gc = el.grain.getContext('2d');
+  const img = gc.createImageData(W, H);
+  let seed = 20260802;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = 108 + rnd() * 40;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = 255;
+  }
+  gc.putImageData(img, 0, 0);
+
+  await document.fonts.ready;
+  /* the plates are CSS background images — make sure they are decoded before
+     the first screenshot, or frame 0 renders empty */
+  await Promise.all(['assets/sat.jpg', 'assets/real.jpg'].map(src => new Promise(res => {
+    const im = new Image(); im.onload = im.onerror = res; im.src = src;
+  })));
+  renderFrame(0);
+};
+
+window.renderFrame = function (t) {
+  t = clamp(t, 0, DURATION);
+
+  /* one push-in shared by both plates */
+  const z = lerp(1, ZOOM_TO, t / DURATION);
+  const tf = `scale(${z.toFixed(5)})`;
+  el.sat.style.transform = tf;
+  el.real.style.transform = tf;
+
+  /* the wipe */
+  const p = smooth(win(t, 0, WIPE_END));
+  const x = p * W;
+  el.real.style.clipPath = `inset(0 ${(W - x).toFixed(1)}px 0 0)`;
+
+  /* the seam rides the boundary and fades out as it leaves the frame */
+  const seamA = outCubic(win(t, 0, 0.35)) * (1 - win(t, WIPE_END - 0.5, WIPE_END));
+  el.seam.style.left = x.toFixed(1) + 'px';
+  el.seam.style.opacity = (seamA * 0.9).toFixed(3);
+  el.seamLine.style.left = x.toFixed(1) + 'px';
+  el.seamLine.style.opacity = seamA.toFixed(3);
+
+  /* caption */
+  const c = outQuint(win(t, CTA_IN, CTA_IN + 0.55));
+  el.wash.style.opacity = outCubic(win(t, CTA_IN - 0.1, CTA_IN + 0.5)).toFixed(3);
+  el.cta.style.opacity = c.toFixed(3);
+
+  const p1 = outQuint(win(t, CTA_IN, CTA_IN + 0.5));
+  const p2 = outBack(win(t, CTA_IN + 0.12, CTA_IN + 0.78));
+  const p3 = outQuint(win(t, CTA_IN + 0.24, CTA_IN + 0.74));
+  el.l1.style.transform = `translateY(${((1 - p1) * 26).toFixed(1)}px)`;
+  el.l2.style.transform = `skewX(-9deg) scale(${lerp(0.86, 1, p2).toFixed(4)})`;
+  el.l3.style.transform = `translateY(${((1 - p3) * 26).toFixed(1)}px)`;
+};
+</script>
+</body>
+</html>

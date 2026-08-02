@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 eyes-video/node_modules
 design-prompts-video/node_modules
+taj-morph-video/node_modules
