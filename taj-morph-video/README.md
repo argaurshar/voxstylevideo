@@ -20,12 +20,24 @@ between two different pictures instead of one place transforming.
 | `assets/sat.jpg` | Flat satellite basemap look — even overcast light, desaturated, no long shadows |
 | `assets/real.jpg` | The same framing as a golden-hour photoreal aerial drone shot |
 
-Both are generated with Magnific (Seedream 5 Pro), 9:16, 2k. `real.jpg` is
-produced as a **reference-guided edit of `sat.jpg`**, not a fresh prompt, which
-is what keeps the two aligned.
+Both are generated with Magnific (Seedream 5 Pro), 9:16. `real.jpg` is produced
+as a **reference-guided edit of `sat.jpg`**, not a fresh prompt, which is what
+keeps the two aligned. Verify a new pair before rendering by compositing the
+left half of one against the right half of the other — walls, the pool axis and
+the minarets should run straight through the seam:
+
+    ffmpeg -i sat.jpg -i real.jpg -filter_complex \
+      "[0:v]crop=iw/2:ih:0:0[l];[1:v]crop=iw/2:ih:iw/2:0[r];[l][r]hstack=2" check.png
 
 Neither plate is real satellite imagery, so there is no mapping-service licence
 attached to the output, and the clip carries no third-party branding.
+
+The committed plates came back from the generator at 450×800 and were brought up
+to 1320×2347 with `scale=...:flags=lanczos` plus a light `unsharp`. 1320 is
+deliberate: the stage is 1080 wide and pushes in to 1.22×, so the plate is very
+slightly downsampled at the start and lands at roughly 1:1 at the end, which is
+the sharpest that source allows. Regenerating at full resolution and redoing
+that step is the single biggest available quality win.
 
 ## Timing
 
@@ -34,6 +46,12 @@ attached to the output, and the clip carries no third-party branding.
     0.00 – 10.00  push-in, 1.00 -> 1.22
 
 `WIPE_END`, `CTA_IN` and `ZOOM_TO` at the top of the script drive all of it.
+
+The caption sits over the lower garden rather than centred on the frame. The
+mausoleum is the payoff of the whole clip — putting three lines of type across
+its dome at the exact moment it finishes transforming throws away the thing the
+viewer waited ten seconds for. The lower quadrants are also calmer, so the type
+reads without a heavier wash.
 
 The reference clip put its caption at 9.2 s, leaving it on screen for 0.9 s.
 This one lands at 8.4 s for 1.6 s — the caption is the only thing in the piece

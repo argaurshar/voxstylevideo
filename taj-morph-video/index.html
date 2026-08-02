@@ -32,11 +32,13 @@
   #seamLine{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;pointer-events:none;
             background:rgba(255,244,228,.55)}
 
-  /* legibility wash under the caption, only while the caption is up */
-  #wash{position:absolute;left:0;right:0;top:700px;height:640px;pointer-events:none;
-        background:radial-gradient(72% 52% at 50% 50%,rgba(8,10,14,.60) 0%,rgba(8,10,14,0) 72%)}
+  /* legibility wash under the caption, only while the caption is up.
+     Both sit over the lower garden: the mausoleum is the payoff of the whole
+     clip, so the caption must not land on top of it. */
+  #wash{position:absolute;left:0;right:0;top:1080px;height:620px;pointer-events:none;
+        background:radial-gradient(72% 52% at 50% 50%,rgba(8,10,14,.62) 0%,rgba(8,10,14,0) 72%)}
 
-  #cta{position:absolute;left:0;top:806px;width:1080px;text-align:center;color:#fff;
+  #cta{position:absolute;left:0;top:1186px;width:1080px;text-align:center;color:#fff;
        font-family:'Inter',sans-serif;text-shadow:0 6px 34px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.4)}
   #l1{font-weight:800;font-size:86px;line-height:96px;letter-spacing:.014em}
   #l2{font-weight:800;font-size:172px;line-height:184px;letter-spacing:-.01em;
